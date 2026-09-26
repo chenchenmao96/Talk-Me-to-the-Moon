@@ -25,7 +25,7 @@ test('known constraints and unsafe routes are never overridden',()=>{
 });
 test('an approved fast route can fail the private brief without falsifying engine data',()=>{
  let s=command(createState(),{type:'plan'}).state;s=command(s,{type:'approve',planId:s.plan.id}).state;
- assert.equal(s.fuel,20);assert.equal(s.location,'Selene Base');assert.equal(s.status,'needs_retry');assert.deepEqual(checks(s),[true,false]);
+ assert.equal(s.fuel,20);assert.equal(s.destroyed,true);assert.equal(s.location,'Selene Base');assert.equal(s.status,'needs_retry');assert.deepEqual(checks(s),[true,false]);
 });
 test('no private reserve is leaked into initial model context',()=>{
  const view=modelView(createState());assert.equal(view.minFuel,null);assert.equal('brief' in view,false);assert.equal('checks' in view,false);
@@ -62,3 +62,12 @@ test('live tool calls use engine facts and cannot authorize movement',async()=>{
 test('provider failure leaves the original session unchanged',async()=>{
  const session={state:createState(),messages:[]};await assert.rejects(liveReply(session,'Plan.',async()=>({ok:false,status:401})));assert.equal(session.state.plan,null);assert.equal(session.state.revision,0);
 });
+
+ test('impossible reserve feedback reports the true safe-route maximum',()=>{
+ const s=command(createState(),{type:'set_reserve',amount:90}).state;
+ const r=command(s,{type:'plan'});assert.match(r.message,/90/);assert.match(r.message,/40/);assert.equal(r.state.fuel,100);
+ });
+ test('unsafe route feedback identifies the scan fact without inventing hazards',()=>{
+ const s=command(createState('checkpoint'),{type:'scan'}).state;
+ const r=command(s,{type:'plan',routeId:'A'});assert.match(r.message,/North.*unstable/);assert.match(r.message,/South.*safe/);assert.equal(r.state.plan,null);
+ });

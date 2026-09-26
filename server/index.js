@@ -35,7 +35,7 @@ export const server=http.createServer(async(req,res)=>{
     if(mode==='live'&&!liveAvailable())return send(res,503,{error:'Live copilot is not configured. Practice mode remains available.'});
     if(mode==='live'&&process.env.LIVE_ACCESS_CODE&&!safeEqual(input.accessCode,process.env.LIVE_ACCESS_CODE))return send(res,403,{error:'The live access code is not correct.'});
     const id=randomUUID(),state=createState(input.missionId||'reserve');
-    const intro=state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'LUNA online. Let’s inspect the landing sites before choosing an approach. Your approval is required before I move.':'LUNA online. Tell me your destination and any conditions I should respect. My route planner favors speed unless you specify a constraint. I will always show the plan before moving.';
+    const intro=state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'BOLT here! Two landing spots. One looks suspicious. Ask me to scan before we pick a route.':'Hey, I’m BOLT. Where are we going? Any limits? I pick the fastest route unless you tell me otherwise. You get the launch button.';
     const s={id,state,mode,messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
    }
    const s=sessions.get(input.sessionId);if(!s)return send(res,404,{error:'This session has expired. Start a new attempt.',expired:true});

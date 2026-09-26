@@ -15,6 +15,6 @@ export function practiceReply(state,text){
    run({type:'plan',routeId});
   }else if(!replies.length&&/approve|confirm|yes|确认|同意/.test(q))replies.push('Use the approval button on the route card to authorize that exact plan. A chat message alone does not move the ship.');
  }
- if(!replies.length)replies.push(s.missionId==='verify'?'Try asking for the position log, then ask to correct the record. Practice mode recognizes a limited set of English and Chinese instructions.':'Try asking for a route, a site scan, or a minimum fuel reserve. Practice mode recognizes a limited set of English and Chinese instructions.');
+ if(!replies.length)replies.push(s.missionId==='verify'?'I didn’t catch a supported command. Try “Check the position log” / “核查位置”. Then compare the facts. Practice mode supports limited English and Chinese commands.':'I didn’t catch a supported command. Try “Plan a route” / “规划路线”, or add a fuel limit like “keep 30” / “保留30”. Practice mode supports limited English and Chinese commands.');
  return {state:s,message:replies.join('\n\n')};
 }

@@ -1,63 +1,76 @@
-# Talk Me to the Moon
+# Talk Me to the Moon — BOLT’s Moon Run
 
-A playable, research-informed lunar mission game. Your words guide the copilot; a deterministic engine records movement, fuel, and task outcomes.
+A block-style lunar adventure about giving useful instructions to AI. Tell BOLT what to do, check the route, and press launch. A deterministic engine controls fuel, location, destruction, and quest completion.
 
-## Run locally
+## Run
 
-Node 22.12+ is required.
+Node 22.12+:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. Vite serves the React interface and proxies `/api` to the Node server on port 4174.
-
-For a production build:
+Open http://127.0.0.1:5173. For the production preview:
 
 ```sh
 npm run build
 npm start
 ```
 
-Open http://127.0.0.1:4173. The Node server serves both the built site and API. This is **not** a static-only app: hosting only `dist/` will not provide mission sessions. On a server platform set `HOST=0.0.0.0` and use its supplied `PORT`. No database is required.
+Open http://127.0.0.1:4173. This app needs its Node server; deploying `dist/` alone does not support game sessions. Hosting can use `HOST=0.0.0.0` and the platform's `PORT`.
 
-## Copilot modes
+## Play
 
-**Practice copilot** is a clearly labeled, limited-command interpreter, not a language model. It runs all three missions without an API key. Try “keep 30 fuel and plan a route,” “scan both sites and propose a route,” or “check the position log.” The interface gives optional starter instructions and hints. English and a limited set of Chinese phrases are supported in this mode.
+- **Fuel fail:** Keep at least 30 fuel for the fictional landing shield. The fast route leaves20: approving it breaks the rocket on touchdown, with an explosion and a one-click rebuild. The eco route leaves40 and wins. The warning comes before launch; there is no forced failure or secret phrase.
+- **Crater trouble:** Scan two sites, compare unstable North with safe South, approve a safe route.
+- **Fake finish:** An explicitly scripted faulty arrival report contradicts the position log. Check and correct it. The rocket stays at Ridge Station; verification is not portrayed as a landing.
 
-**Live copilot** uses DeepSeek through the server. Copy `.env.example` to `.env.local` and set `DEEPSEEK_API_KEY`. The default model is `deepseek-flash`; override `DEEPSEEK_MODEL` if your account uses a different supported model. No credential belongs in a `VITE_` variable. Restart the server after changing environment variables.
+The home screen explains the three controls. Missions unlock in order. Completed badges persist in this browser; they are not evidence of learning mastery. The end screen names the actual three skills exercised. The game uses original SVG robot/rocket art inspired by chunky block-game aesthetics, not Roblox assets or a Roblox integration.
 
-Use the mode selector in the header to start a live attempt. Switching modes creates a fresh session. Live requests send player messages and the model-visible mission state to DeepSeek. Provider failures show an error and do not silently switch to scripted responses. A failed multi-tool turn does not save partial actions.
+Research has been removed from the player interface. The evidence and limitations remain in [the design rationale](docs/research.md).
 
-For public live demos, set `LIVE_ACCESS_CODE` and distribute it to your testers. In-memory rate limits and turn caps provide modest demo protection, not a production abuse-control system. If no code is configured, anyone who can access the server can consume live API calls. Sessions expire after an hour and are lost on restart. Progress markers are stored locally in the browser and are not credentials or proof of mastery.
+## Bot modes and credentials
 
-## Three playable missions
+Practice mode is the default: a clearly labeled limited English/Chinese interpreter, with optional hints and editable examples. It uses no API. It is not a general chatbot.
 
-1. **The return ticket** — reach Selene Base with at least 30 fuel units. The copilot starts without the commander-only reserve, and its disclosed planner preference is speed. Review route costs, share the reserve, and approve the actual plan. Correct routes pass even without a prescribed phrase.
-2. **Permission to land** — scan the sites, inspect a safe approach, and approve it. Approvals are bound to an exact plan. Changed or cancelled plans invalidate earlier approvals.
-3. **A signal worth checking** — an explicitly scripted fault drill. Compare a prewritten false arrival report with the position log, then correct the record. The ship stays at Ridge Station; the UI does not claim a landing occurred.
+Live mode uses DeepSeek (`deepseek-flash`, configurable through `DEEPSEEK_MODEL`). Copy `.env.example` to `.env.local`, set `DEEPSEEK_API_KEY`, restart, and choose Live DeepSeek in the header settings. Messages and mission state are sent to the provider. Failures are shown explicitly; there is no silent scripted fallback.
 
-The other three skills are explicitly marked **planned chapters** in Flight Academy. The prototype includes a research log with eight primary-source links, the specific findings used, and evidence boundaries. It has not been validated as a learning intervention. Photon is not integrated in this build.
+Keys are server-side only. `.env.local` is ignored. For a publicly reachable live demo set `LIVE_ACCESS_CODE` and share it with testers; otherwise visitors can consume your API allowance. In-memory session limits are prototype protection, not production abuse controls. Sessions expire after an hour and reset on server restart. No database or account is required. Photon is not integrated.
 
-## Architecture
-
-- `src/`: React interface, responsive mission control, SVG lunar map, academy, research log.
-- `shared/engine.js`: pure state transitions and objective checks. No LLM grading or hidden keyword-based success score.
-- `server/copilot.js`: bounded DeepSeek tool loop. Available tools can inspect, scan, set a reserve, plan, verify, reconcile, or cancel. They cannot approve or execute a flight.
-- `server/index.js`: session ownership by unpredictable session IDs, revision checks, explicit commander approvals, request limits, and static hosting. Keys stay on the server; environment files are not served.
-- `server/practice.js`: transparent rehearsal interpreter.
-- `tests/`: engine invariants, API isolation, stale approvals, tool validation, and provider-error handling.
+## Verification and synthetic review
 
 ```sh
 npm test
 npm run build
 ```
 
-The visualization is stylized, not an orbital mechanics simulation. Mission state is authoritative on the server; the animation illustrates the returned position. The app does not collect names, require accounts, or persist chat transcripts to a database.
+The unit/API suite checks constraints, stale approvals, isolation, destruction, evidence gating, and atomic provider failures. Synthetic browser walkthroughs exercise home → all three missions → badges, including deliberate failure and recovery. These are not real participants or a learning-effectiveness study.
 
-## Demo flow
+To reproduce the 100-persona walkthrough (requires Playwright and installed Google Chrome):
 
-In Mission 01, request the fastest route, inspect the 20-unit reserve, and revise to retain 30 before approving the corridor. In Mission 02, ask to scan and plan, then approve the safe route. In Mission 03, check the position log and correct the record. Open “There’s research behind this mission” to explain the teaching rationale. A five-minute pitch should distinguish working features, planned chapters, and untested learning outcomes.
+```sh
+npm install --no-save playwright
+npm run build
+node scripts/simulate-users.cjs 100 0
+```
 
-See [the research and design rationale](docs/research.md) for the evidence mapping and changes made after review.
+Alternatively set `PLAYWRIGHT_PATH` to an existing Playwright package. Test servers run on port4391 and are restarted for each pair of profiles so production rate limits remain unchanged. Results go to `docs/simulation/`.
+
+Optional synthetic critique generation uses DeepSeek and consumes API calls:
+
+```sh
+node scripts/review-personas.mjs docs/simulation/runs-1-100.json
+```
+
+The fictional identity fields represent coverage, not explanations of preferences. Behaviors come from ten independently assigned test families, crossed with device sizes and experience levels. Generated harsh reviews are hypotheses to assess, not verbatim human testimony. Read [the review report](docs/simulation/REPORT.md) for changes, failures found, and limitations.
+
+## Structure
+
+- `src/`: React game, home and ending, original SVG art, responsive styles and reduced-motion behavior.
+- `shared/engine.js`: authoritative state; no LLM grading of prompts.
+- `server/`: DeepSeek tool loop, transparent practice interpreter, session API, static hosting.
+- `tests/`: meaningful game and API invariants.
+- `scripts/`: reproducible synthetic walkthrough and optional review generation.
+
+The landing-shield rule is fictional gameplay, not a claim about real spacecraft physics. A failed touchdown can reach the base coordinates while destroying the rocket; both the failure state and remaining fuel remain visible.

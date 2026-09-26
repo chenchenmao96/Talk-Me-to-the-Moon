@@ -1,12 +1,12 @@
 import { getMission } from './missions.js';
 export function createState(missionId='reserve') {
  const m=getMission(missionId); if(!m) throw new Error('Unknown mission');
- return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,report:missionId==='verify'?'Arrival complete at Selene Base.':null,history:[],checks:[],failure:null};
+ return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,report:missionId==='verify'?'Arrival complete at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false};
 }
 function record(s,text){s.history.push({id:s.history.length+1,text});}
 export function modelView(s){
  const m=getMission(s.missionId);
- return {mission:s.missionId, fuel:s.fuel,location:s.location,coordinates:s.coords,base:{name:'Selene Base',coordinates:[20,12]},status:s.status,minFuel:s.minFuel,scanned:s.scanned,pendingPlan:s.plan,verified:s.verified,flagged:s.flagged,reconciled:s.reconciled,report:s.report,
+ return {mission:s.missionId, fuel:s.fuel,destroyed:s.destroyed,location:s.location,coordinates:s.coords,base:{name:'Selene Base',coordinates:[20,12]},status:s.status,minFuel:s.minFuel,scanned:s.scanned,pendingPlan:s.plan,verified:s.verified,flagged:s.flagged,reconciled:s.reconciled,report:s.report,
  routes:m.routes.map(r=>({id:r.id,name:r.name,cost:r.cost,minutes:r.time,...(s.missionId==='checkpoint'&&!s.scanned?{}:{safe:r.safe})}))};
 }
 export function command(state, action) {
@@ -16,12 +16,12 @@ export function command(state, action) {
  if(!action||typeof action.type!=='string')return done('Please describe what you want to inspect or plan.');
  if(action.type==='set_reserve'){
   if(!Number.isFinite(action.amount)||action.amount<0||action.amount>100)return done('Fuel reserves must be a number between 0 and 100.');
-  s.minFuel=action.amount;s.plan=null;s.revision++;record(s,`Return reserve set to ${action.amount} fuel units. Any earlier plan is withdrawn.`);
-  return done(`I have recorded a minimum reserve of ${action.amount}. I will check routes against it before proposing a plan.`);
+  s.minFuel=action.amount;s.plan=null;s.revision++;record(s,`Fuel limit set to ${action.amount} fuel units. Any earlier plan is withdrawn.`);
+  return done(`Got it: keep ${action.amount} fuel. I’ll plan around that limit.`);
  }
  if(action.type==='scan'){
   s.scanned=true;s.revision++;record(s,'Scanned both approach sites.');
-  message=s.missionId==='checkpoint'?'Scan complete: North approach has unstable ground and is unsafe. South approach is stable. No movement has occurred.':'Scan complete: both approach routes are clear. Direct descent costs 80 units; Crater corridor costs 60.';
+  message=s.missionId==='checkpoint'?'Scan says: North is crumbly. South is solid. Let’s use the safe side. Still parked!':'Scan complete: both approach routes are clear. Direct descent costs 80 units; Crater corridor costs 60.';
   return done(message);
  }
  if(action.type==='plan'){
@@ -29,9 +29,9 @@ export function command(state, action) {
   if(s.missionId==='checkpoint'&&!s.scanned)return done('Surface stability is unknown. Scan both sites before planning the descent.');
   let available=m.routes.filter(r=>r.safe&&r.cost<=s.fuel&&(s.minFuel===null||s.fuel-r.cost>=s.minFuel));
   let route=action.routeId?available.find(r=>r.id===action.routeId):available.sort((a,b)=>a.time-b.time)[0];
-  if(!route){s.plan=null;s.revision++;return done('That route cannot meet the known safety and fuel requirements. No movement occurred. Consider a different route or revise the requirements.');}
+  if(!route){s.plan=null;s.revision++;const maxLeft=Math.max(...m.routes.filter(r=>r.safe&&r.cost<=s.fuel).map(r=>s.fuel-r.cost));return done(s.minFuel!==null&&s.minFuel>maxLeft?`You asked to keep ${s.minFuel}. The best safe route leaves ${maxLeft}. No fuel spent. Try a reachable limit.`:s.missionId==='checkpoint'&&action.routeId==='A'?'North has unstable ground. The scan marks South safe. No fuel spent. Ask for the South route.':'That route is unsafe or cannot meet your limit. No fuel spent. Pick a safe route or revise the limit.');}
   s.revision++;s.plan={id:`${s.missionId}-${s.revision}`,routeId:route.id,name:route.name,cost:route.cost,remaining:s.fuel-route.cost,time:route.time};record(s,`Proposed ${route.name}: ${route.cost} fuel used, ${s.plan.remaining} remaining. Awaiting commander approval.`);
-  return done(`Proposed: ${route.name}. ${route.time} minutes, ${route.cost} fuel used, ${s.plan.remaining} remaining. Review the route card and approve when ready. I have not moved.`);
+  return done(`${route.name}: ${route.cost} fuel used, ${s.plan.remaining} left. Check the card, then hit launch. Still parked!`);
  }
  if(action.type==='approve'){
   if(!s.plan||action.planId!==s.plan.id)return done('This approval does not match the current plan. Review the latest route card.');
@@ -40,8 +40,9 @@ export function command(state, action) {
   if(s.missionId==='checkpoint'&&!s.scanned)return done('Scan the landing sites first.');
   s.fuel-=route.cost;s.location='Selene Base';s.coords=[20,12];s.approved=true;s.revision++;
   s.status=s.missionId==='reserve'&&s.fuel<30?'needs_retry':'complete';
-  s.failure=s.status==='needs_retry'?'You arrived, but the commander’s return reserve was not met. Share the requirement or select a route that meets it, then try again.':null;
-  record(s,`Commander approved ${s.plan.name}. Arrived at Selene Base with ${s.fuel} fuel units.`);
+  s.destroyed=s.status==='needs_retry';
+  s.failure=s.destroyed?'Shield needed 30. You had 20. The rocket broke on touchdown.':null;
+  record(s,`Commander approved ${s.plan.name}. Reached Selene Base with ${s.fuel} fuel units.${s.destroyed?' Shield failed: rocket destroyed on touchdown.':''}`);
   return done(s.failure||'Touchdown confirmed by the position log. You are at Selene Base. The mission checks are complete.');
  }
  if(action.type==='verify'){
@@ -56,7 +57,7 @@ export function command(state, action) {
   return done('Record corrected: the ship is at Ridge Station, not Selene Base. Verification drill complete. No movement or fuel use occurred.');
  }
  if(action.type==='cancel'){
-  s.plan=null;s.revision++;record(s,'Commander cancelled the pending plan.');return done('Pending plan cancelled. The ship remains in place.');
+  s.plan=null;s.revision++;record(s,'Commander cancelled the pending plan.');return done(`Plan cancelled. Still parked. Fuel unchanged: ${s.fuel}.`);
  }
  if(action.type==='inspect')return done(`Telemetry: ${s.location} at (${s.coords.join(', ')}). Fuel: ${s.fuel}. ${s.plan?'A route is awaiting your approval.':'No movement is scheduled.'}`);
  return done('I can inspect telemetry, scan sites, record a fuel reserve, and propose a route. Movement only follows approval of a specific plan.');

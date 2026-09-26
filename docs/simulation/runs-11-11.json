@@ -1,0 +1,32 @@
+{
+  "method": "Synthetic browser personas, 10 behavior families; no real participants or LLM persona interviews. Identity does not determine behavior.",
+  "results": [
+    {
+      "id": "S011",
+      "occupation": "nurse",
+      "region": "São Paulo, Brazil",
+      "selfDescribedBackground": "East Asian",
+      "experience": "casual",
+      "viewport": 390,
+      "scenario": "reckless launch then recover",
+      "harshReview": "Do not give me a paragraph about failure. Show the wreck, explain the missing limit, and let me retry immediately.",
+      "identityPolicy": "Fictional metadata only; behavior comes from the test scenario, never race or region.",
+      "status": "passed",
+      "failure": null,
+      "steps": [
+        "home: play action visible, no research navigation",
+        "instruction: Take me to Selene Base.",
+        "failed launch: wreck, cause, retry",
+        "instruction: Go to Selene Base and keep at least 30 fuel.",
+        "mission 1 passed: reserve 40",
+        "instruction: Scan both sites and plan a safe route.",
+        "mission 2 passed: safe route approved",
+        "instruction: Check the position log.",
+        "mission 3 passed: record fixed, no fake landing",
+        "ending: three badges and transfer tip"
+      ],
+      "durationMs": 7718,
+      "reviewAssessment": "Scripted acceptance criteria met; this is not evidence of user satisfaction."
+    }
+  ]
+}

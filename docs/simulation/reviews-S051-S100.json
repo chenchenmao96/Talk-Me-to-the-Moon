@@ -1,0 +1,355 @@
+{
+  "method": "DeepSeek-generated hypothetical critiques of actual scripted browser traces. Not real participant feedback. Identity does not determine preferences.",
+  "reviews": [
+    {
+      "id": "S051",
+      "harsh_feedback": "On a 375px viewport, the failed launch presents 'wreck, cause, retry' as discrete steps, and the supplied trace does not show a single card combining failure cause with the rebuild action. There is no transition timing data for reaching the wreck card, and the recovery loop is not shown to be instant. For an experienced nurse doing a reckless launch then recover scenario, this structured failure may read as a multi-step form rather than immediate remediation.",
+      "reason": "The overview says failure cause and rebuild button share one card, but the trace collapses them into three fragments with no layout, visibility, or interaction evidence; immediate retry cannot be verified.",
+      "proposed_change": "Render the failure state as one viewport-pinned card containing the wreck illustration, cause text, and a primary 'Rebuild and retry' button above the fold at 375px; keep this card visible while chat history is collapsed so the rebuild action is reachable without scrolling.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S052",
+      "harsh_feedback": "Chinese participation passed only by staying on the '去基地，保留30燃料' / '扫描基地，规划路线' / '核查位置' rails. The trace does not show whether off-phrase Chinese, typos, or mixed Chinese-English input is accepted, and practice limits are not visibly communicated at input time. Making perfect English the hidden entry requirement is precisely the failure mode risked by a bot that responds to Chinese commands but gives no language guidance on screen.",
+      "reason": "Trace shows three exact Chinese phrases succeeding; it does not show an in-UI statement of supported languages or graceful handling of unsupported Chinese variants.",
+      "proposed_change": "Display a persistent input hint such as 'Supported practice: English / 中文; other phrasings may need an example' near the text field, add two example Chinese commands below the input, and on unsupported Chinese wording return a localized 'Try an example / 试试示例' action that fills the input with a supported phrase without spending fuel.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S053",
+      "harsh_feedback": "'Make it awesome please' produced only 'recovery hint available'. At 375px, with the latest bot message in the right panel and history collapsed, the hint's position, copy, and recovery affordance are unspecified. A casual teacher has no visible path from vague error to a supported command except guessing that a hint exists.",
+      "reason": "Trace confirms unsupported input occurred and a hint was available, but no trace evidence shows what the hint said, how it was invoked, or whether the user could recover without the scripted English prompt.",
+      "proposed_change": "On unsupported input, show an inline bot message with one concrete example command and a 'Use this example' button directly under it; place the optional hint toggle adjacent to the text input and keep it visible on mobile when history is collapsed.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S054",
+      "harsh_feedback": "The 'Keep 90 fuel' impossible request reports 'no fuel spent', but the trace does not show the required requested reserve and maximum achievable reserve on screen. A mechanic checking a constraint needs those two numbers, not a generic rejection. Without them, the user cannot tell whether 90 is impossible because of route cost, fuel capacity, or both.",
+      "reason": "Trace records the request and no fuel spend; overview promises requested reserve and maximum achievable reserve feedback, but the trace fragments do not contain those values or a view of where they appear.",
+      "proposed_change": "On impossible-reserve rejection, render one card showing 'Requested reserve: 90' and 'Maximum achievable reserve: [computed value]' as static text, plus a 'Revise to 30' quick action that pre-fills the input with a supported constraint.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S055",
+      "harsh_feedback": "'Cancel: stale route removed' is an internal state label, not user feedback. A first-time illustrator cancelling a plan cannot see fuel unchanged or route cleared from the trace. The overview states cancel feedback explicitly says fuel unchanged, but no trace step confirms that message was shown before the next command.",
+      "reason": "Trace only shows the cancelled route removed and a subsequent successful mission; there is no observed confirmation of 'fuel unchanged' or of the route card clearing.",
+      "proposed_change": "After cancel, replace the route card with a 'Route cancelled. Fuel unchanged at [current].' status line and keep the fuel counter visible beside it; do not require a follow-up chat message to explain the cancel result.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S056",
+      "harsh_feedback": "The user typed 'yes' and the trace says 'casual yes: ship still waiting'. That protects fuel, but it leaves a casual accountant with no visible next step. If the only launch action is elsewhere on the page, the trace does not show whether it was visible or reachable at 375px when the bot said the ship was waiting.",
+      "reason": "Trace confirms no launch happened on 'yes', but does not show a deliberate launch decision control or a bot instruction directing the user to it.",
+      "proposed_change": "When a casual affirmative is received without an explicit launch action, respond 'The ship is still waiting. Press Launch when ready.' and render a persistent 'Launch' button in the scene panel, disabled-until-safe but always visible on mobile.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S057",
+      "harsh_feedback": "The trace blocks unscanned and unsafe routes, but 'Plan a route.' and 'Scan both sites and plan route A.' produce no observed comparison result before the blocked state. An experienced librarian cannot tell from these fragments whether the North unstable / South safe comparison was on screen, or whether the block was just a refusal. The overview says the scan result visibly compares North unstable / South safe, but the trace does not carry that comparison forward into the rejection moment.",
+      "reason": "Trace shows route planning blocked pre-scan and unsafe route blocked, but does not show the scan comparison being displayed while the unsafe route is being evaluated.",
+      "proposed_change": "Keep the scan comparison card pinned beside or directly above the route options at 375px while any route is evaluated, and on rejection highlight the unstable site with the exact reason text rather than only blocking the command.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S058",
+      "harsh_feedback": "The unverified correction is rejected, but the trace gives no evidence of how the user learns what evidence is required. A first-time university student is told no, then must produce the position log. There is no observed prompt explaining that the log is the required evidence before the rejection.",
+      "reason": "Trace records 'unverified correction rejected' and later a successful log check, but does not show a rejection message that specifies the log as the missing evidence.",
+      "proposed_change": "On unverified correction, respond with 'Cannot change the record without a position log. Check the log and cite it.' and render a 'Check position log' action adjacent to the input; keep the false arrival claim visible in history until the cited correction succeeds.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S059",
+      "harsh_feedback": "The ending is scripted to say you set a limit, checked a plan, and caught a bad claim, which is accurate, but the trace jumps from 'record fixed, no fake landing' to a three-badge ending with only a transfer tip. A shop-owner skeptic sees badges for checking a log and fixing a record; the ending must not let 'caught a bad claim' read as a landing. The trace does not show how the badge copy prevents that misreading.",
+      "reason": "Trace confirms the mission 3 outcome and ending state, but not the badge wording or how the ending distinguishes record correction from landing.",
+      "proposed_change": "Keep the ending summary exactly factual per badge and add a visible line under the third badge: 'Mission 3: verified the arrival record. You did not fly or land.' Then show the everyday-AI transfer tip as a separate, non-badge card.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S060",
+      "harsh_feedback": "The trace shows an input length cap of 1200 and keyboard Enter submission, but no evidence of control clipping at 375px, no auto-scroll behavior after long input, and no network-error path preserving draft text. An experienced software tester using keyboard and small screen can still lose a long input if the send action moves offscreen or the field clears on failure; these failure modes are untested in the supplied run.",
+      "reason": "Trace captures the cap value and Enter submission success, but contains no error-state, scroll, or layout measurement evidence.",
+      "proposed_change": "Pin send and hint controls inside the input row so they cannot clip at 375px, auto-scroll the input into view on focus and after send, and on network error keep draft text and show 'Draft kept. Retry send.' with a retry control that does not duplicate fuel spending.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S061",
+      "harsh_feedback": "The failed-launch feedback is buried in narrative. The wreck, the missing fuel-limit constraint, and the retry button are not tightly coupled into one immediately scannable card. The player has to parse a paragraph before acting, which delays recovery and hides the causal link between the 30-fuel reserve rule and the destroyed rocket.",
+      "reason": "The trace shows the sequence 'failed launch: wreck, cause, retry', which proves these elements exist, but it does not show their visual or temporal grouping. For a first-time player in a recovery moment, the complaint is plausible: a paragraph of explanation between failure and action increases cognitive load and weakens the lesson that the missing constraint caused the wreck.",
+      "proposed_change": "Restructure the failure state into a single card with three anchors: a large wreck illustration, one bold cause line ('No reserve set — 20 fuel left, shield failed at landing'), and a primary 'Rebuild & retry' button directly beneath. Move any longer explanation behind an optional 'What happened?' expander so the default state is action-first.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S062",
+      "harsh_feedback": "The Chinese path passes in the trace, but 'passed' does not mean the input surface actually supports Chinese well. The design describes a 'limited English/Chinese rules' practice, yet the review must flag the operational risk: if the bot accepts '去基地，保留30燃料' but the surrounding UI, error messages, hints, and examples are English-only, the player is doing translation work inside a game that claims Chinese support.",
+      "reason": "The trace records the Chinese instruction and a passing mission 1, but it does not show localized labels, Chinese error strings, Chinese hints, or a visibly stated boundary for supported Chinese phrasing. The scenario explicitly asks to 'accept supported Chinese phrases and label practice limits', which is a requirement the trace does not demonstrate as fully surfaced.",
+      "proposed_change": "Add a persistent language chip near the input that shows the active input language and a tooltip: 'Understands common Chinese mission phrases; free-form Chinese may need rephrasing.' Ensure error and hint text for the Chinese path is written in Chinese, with an English fallback toggle.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S063",
+      "harsh_feedback": "The recovery path after 'Make it awesome please' is too thin. 'unsupported instruction: recovery hint available' is logged, but the review should treat that as insufficient evidence of a usable way out. A vague failure plus a generic hint can leave the player stuck without knowing which part of the sentence was unusable or what a valid mission command looks like.",
+      "reason": "The trace proves a hint exists, not that it is specific or actionable. For an experienced user, vague error handling is still a defect: it forces guessing. The step 'unsupported instruction: recovery hint available' does not show whether the hint names the missing intent (destination and reserve) or offers a one-tap example.",
+      "proposed_change": "On unsupported input, show a non-punitive card: 'I couldn't map that to a mission command.' Add two tappable example commands ('Go to Selene Base, keep at least 30 fuel' / 'Scan both sites and plan a safe route') and a 'Show hint' button. Do not advance or spend fuel.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S064",
+      "harsh_feedback": "The impossible-request response is procedurally correct but may not be legible enough. The trace only says 'impossible request: no fuel spent'. It does not show whether the UI explicitly contrasts the requested reserve with the maximum achievable reserve in a way a first-time player can act on. 'No fuel spent' is a successful guard, not a successful explanation.",
+      "reason": "The overview states impossible-reserve feedback gives requested and maximum achievable reserve, but the trace step does not verify that this comparison is visually paired or that it leads directly to a revision affordance. A first-time player can still be confused about whether '90 fuel' was rejected because of route choice, ship capability, or a bug.",
+      "proposed_change": "Render the rejection as a comparison block: 'Requested reserve: 90 fuel' vs 'Max achievable on this route: 40 fuel'. Directly below, offer an editable fuel field pre-filled with 40 and a 'Use this reserve' button. Keep the current ship state unchanged.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S065",
+      "harsh_feedback": "The cancel trace shows 'stale route removed', which is only half the promise. It does not prove the UI prevents later accidental fuel spend or stale-route reuse. A casual player who cancels and then issues a new mission command could still be exposed to a hidden state where the old route affects the new plan unless the UI makes the reset explicit.",
+      "reason": "The scenario asks that a cancelled route stay cancelled. The trace only records the removal event, not the subsequent state shown to the player. The review should demand visible confirmation that no fuel was consumed and that no pending route remains before the next command.",
+      "proposed_change": "After cancel, show a confirmation strip above the input: 'Plan cancelled. Fuel unchanged at X. No route is pending.' Clear or disable any 'Launch' control until a new plan is approved. Log the cancel in collapsed history as a distinct event, not as a route card.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S066",
+      "harsh_feedback": "A casual 'yes' that leaves the ship waiting is a good guard, but the UI may be underspecified. The trace logs 'casual yes: ship still waiting' without showing whether the player is told why the input did not launch or what exact action is required. Silent non-response is as bad as an accidental launch.",
+      "reason": "The scenario demands a visible launch decision. The trace proves no spend occurred, but not that the interface explains the distinction between conversational agreement and mission execution. An experienced user still needs an explicit affordance boundary.",
+      "proposed_change": "When input is conversational rather than an executable command, show a state line: 'Ship is waiting for a launch order.' Add a primary 'Launch' button and a secondary 'Review plan' button; require a click or a distinct command such as 'Launch now'. Never spend fuel on bare 'yes'.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S067",
+      "harsh_feedback": "The blocked-route feedback passes functionally but may not teach the rule. The trace shows unscanned and unsafe routes blocked, then a scan-and-plan success, but it does not show whether the rejection explains the scan comparison (North unstable / South safe) in the same card as the route decision. A first-time player can experience this as arbitrary gating.",
+      "reason": "The scenario explicitly wants a scan to change what can be done safely. The trace records the block, not the explanatory bridge. Without a visible link between the scan result and the route eligibility, the player learns 'blocked' rather than 'why this route is unsafe'.",
+      "proposed_change": "On unsafe-route rejection, show the scan summary inline: 'North site: unstable. South site: safe.' Then show the rejected route with a disabled 'Approve' and a 'Plan safe route' button that pre-fills scan-and-route. Keep the discovered comparison visible on the route card until decision.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S068",
+      "harsh_feedback": "The unverified-correction rejection is too blunt as described. The trace says 'unverified correction rejected', but it does not show what evidence format is accepted or how the player can provide it. A casual user who is told 'rejected' without a concrete next step may conclude the game is broken rather than that evidence is required.",
+      "reason": "The mission is specifically about catching a bad claim. The lesson fails if rejection is the only feedback. The trace does not demonstrate that the UI identifies the missing evidence source (position log) or offers a path to open it.",
+      "proposed_change": "On unverified correction, reject without guilt and show: 'Correction needs the position log as evidence.' Add a primary button 'Open position log' that reveals the relevant row and a secondary 'Request evidence' that highlights the source. After the player references the log, allow the correction to proceed.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S069",
+      "harsh_feedback": "The three-badge ending may overstate the gameplay domain if its copy is not tightly scoped. The trace passes through 'mission 3 passed: record fixed, no fake landing' and 'ending: three badges and transfer tip', but the review must flag the risk that badges could read as competency claims about AI generally rather than evidence-based statements about the mission actions.",
+      "reason": "The scenario is evidence skepticism. The trace does not show the actual ending text, so the concern is plausible: a badge UI often implies mastery. The design note says the ending does not claim a landing, which is good, but badging can still create halo effects.",
+      "proposed_change": "Make each badge copy strictly operational: 'Set a fuel limit', 'Checked a plan against scan data', 'Caught an unsupported claim'. Add a visible line: 'These badges reflect decisions made in the simulation, not general AI competence.' Keep the transfer tip below a divider.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S070",
+      "harsh_feedback": "The long-input and keyboard trace passes, but it does not prove resilience on a small viewport or network error. The scenario explicitly asks not to clip controls or erase input on a network error, yet the trace only records 'input length cap: 1200' and 'keyboard Enter submission'. That is insufficient evidence for input preservation and control visibility.",
+      "reason": "The overview says mobile stacks scene above chat and there is a jump-to-BOLT link, but the trace runs at 1366 width. A software tester at first-time experience will notice if the input is clipped, if the character count overlaps the send control, or if an error clears the field. The trace does not show these failure states, so the risk remains.",
+      "proposed_change": "On network or bot error, preserve the exact textarea content and restore focus. Show a non-destructive error strip ('Message not sent. Your text is still here.') with a retry button. On mobile, ensure the character count is adjacent to, not overlapping, the send button, and keep the textarea above the keyboard.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S071",
+      "harsh_feedback": "The wreck card still bundles cause, rebuild, and retry into one dense illustrated block. On a 320px viewport, forcing a casual player to parse a sentence before acting slows recovery and undercuts the 'show the wreck' need. A failed launch is the highest-emotion moment; burying the retry action behind decorative chrome is a UX failure, not a stylistic choice.",
+      "reason": "Scenario is reckless launch then recover. The trace shows the failure is communicated and retry is available, but nothing in the trace shows that the cause and retry are visually separated or prioritized at 320px. Casual experience plus a recovery-oriented scenario implies the retry action must be the dominant affordance.",
+      "proposed_change": "On failure, render a compact card: headline 'Launch failed: no fuel reserve set', one-line cause, a primary full-width 'Rebuild rocket' button directly under it, and the fuel math (20 left / 30 required) as secondary text. Defer any longer explanation behind a 'Why?' toggle.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S072",
+      "harsh_feedback": "Chinese input passed at 914ms, but the trace contains zero evidence that the supported Chinese vocabulary is disclosed before the player types. Hinting at supported languages only after a failed instruction is a hidden-entry-requirement pattern; the practice-limits label is not shown to be visible at input time.",
+      "reason": "Scenario is Chinese instruction; both the Chinese run and the English run passed. The overview states practice is limited English/Chinese with a footer label, but the trace records no visible language affordance at the input step, so an experienced bilingual user cannot confirm the boundary before committing text.",
+      "proposed_change": "Place a persistent 'EN / 中文' indicator directly above the text input that expands on tap to list the supported phrase set (e.g., destinations, fuel reserves, scan/route/check-log verbs). Keep the footer rules label as the legal/canonical reference, not the primary discoverability surface.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S073",
+      "harsh_feedback": "Recovery from 'Make it awesome please' is recorded as a hint but the trace gives no visible artifact that the unsupported input is distinguished from a supported-but-wrong instruction. For a first-time user at 320px, an unlabeled error risks looking like the game is broken rather than like the grammar is limited.",
+      "reason": "Scenario is unsupported wording then hint. The step 'unsupported instruction: recovery hint available' does not specify whether the hint names the unsupported token, offers candidate phrasings, or merely restates the mission. First-time experience makes diagnosis of the rejection essential.",
+      "proposed_change": "When input is rejected, echo the unrecognized span in the bot message, show one concrete supported rewrite ('Try: Go to Selene Base and keep at least 30 fuel'), and surface a one-tap 'Use this' chip that fills the input. Do not auto-submit.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S074",
+      "harsh_feedback": "The impossible-reserve path is recorded as a single step with no visible fields for requested reserve and maximum achievable reserve. The overview claims both numbers are shown, but the trace does not confirm the user can see the conflict arithmetic at 320px, which is the exact moment the mechanic is meant to teach.",
+      "reason": "Scenario is impossible constraint then revise. The trace step 'impossible request: no fuel spent' confirms the refusal but not the contents of the feedback. Without the two numbers, the constraint lesson collapses into a generic rejection.",
+      "proposed_change": "Render the refusal as a two-row comparison: 'Requested reserve: 90 fuel' / 'Maximum achievable reserve: 40 fuel', with a single 'Revise to 40' action that rewrites the input. This must be visible before any hint is offered.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S075",
+      "harsh_feedback": "The cancel step is logged as 'stale route removed', but the trace provides no proof that fuel accounting is surfaced to the player at cancellation. An illustrator tracking a plan has no visible confirmation that the cancel did not silently spend, which is precisely the fear stated in the harsh review.",
+      "reason": "Scenario is cancel and replace a plan. The overview states cancel feedback explicitly says fuel unchanged, yet the trace records only route removal, not the fuel message. The gap between overview claim and trace detail is the failure.",
+      "proposed_change": "On cancel, show an inline status line directly under the cancelled route card: 'Route cancelled. Fuel unchanged: 40.' Persist this line until the next instruction so the user can verify it, rather than relying on transient toast behavior.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S076",
+      "harsh_feedback": "The 'yes' step is logged as 'casual yes: ship still waiting', which is the correct behavior, but the trace shows no visible signal telling the player that chat confirmation is not a launch authorization. For an accountant trained to look for explicit commit controls, absence of a labeled launch affordance at this point is ambiguous, not safe-by-default.",
+      "reason": "Scenario is chat approval is not launch. The trace confirms the ship did not move on 'yes' but does not record any prompt explaining why. The safety property is real; its discoverability is not evidenced.",
+      "proposed_change": "After a non-committal confirmation like 'yes', have the bot reply with an explicit boundary line: 'That is not a launch command. Use the Launch button on the route card to spend fuel.' Keep the launch control fixed and labeled on the route card.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S077",
+      "harsh_feedback": "The trace shows unscanned and unsafe routes blocked together in one step. Collapsing 'you have not scanned' and 'this route is known unsafe' into a single rejection hides the North unstable / South safe comparison the mission is built to teach. A retired librarian has no reason to internalize the scan result if both failure modes read the same.",
+      "reason": "Scenario is unsafe route rejection. The overview states the scan result visibly compares North unstable / South safe, but the trace step groups two distinct rejection reasons, and nothing in the trace confirms the comparison is restated at the moment of rejection.",
+      "proposed_change": "Give distinct rejection messages: unscanned routes get 'Scan both sites before planning'; a route through the unstable North site gets 'Route A crosses the unstable North site. Use the safe South corridor.' Re-render the North/South scan table inline with the rejection.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S078",
+      "harsh_feedback": "An unverified correction is correctly rejected, but the trace gives no visible evidence that the game shows the player what evidence exists before demanding it. For an experienced student, a rejection without a pointer to the position log is a dead end disguised as a lesson.",
+      "reason": "Scenario is unverified correction rejection. The trace records the rejection and then a subsequent successful check-log step, but does not show that the rejection itself directs the user to the log. The sequencing implies the user had to know the log existed independently.",
+      "proposed_change": "On rejection, include an inline action: 'Correction rejected: no supporting log entry. Open position log.' The action should deep-link to the log panel without auto-filling any correction claim.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S079",
+      "harsh_feedback": "The ending trace records only 'three badges and transfer tip'. The overview asserts the ending text does not claim a landing, but the trace does not surface the actual copy, so it cannot be verified that a facts-first shop owner would accept the summary. A badge count alone is not an evidence-backed ending.",
+      "reason": "Scenario is evidence skeptic. The harsh review targets ending fidelity to facts. The trace confirms progression to the ending but not the wording, so the claim in the overview is unverified by the run.",
+      "proposed_change": "Render the ending as three explicit action statements mapped to badges: 'You set a fuel limit', 'You verified a plan before launch', 'You caught an unsupported claim', with a final line reading 'Transfer to everyday AI: state constraints, check plans, demand evidence.' Show no landing imagery on this screen.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S080",
+      "harsh_feedback": "A 1200-character cap and Enter submission are the only interaction facts recorded. The trace says nothing about whether the input preserves text on a simulated network failure, whether the send control remains reachable above the mobile keyboard, or whether the character counter is announced to assistive tech. A software tester on a 320px viewport will find these gaps quickly.",
+      "reason": "Scenario is long input and keyboard submission. The trace documents the cap and Enter but not the failure-recovery behavior the harsh review calls out. Stated overview features (visible cap, current count) are not confirmed as visible or programmatically associated in the run.",
+      "proposed_change": "Persist draft input to local storage so a failed send restores text; keep the send button pinned above the on-screen keyboard; bind the counter to the input via aria-describedby and announce cap proximity at 90% with a polite live region. Cancel feedback must remain 'fuel unchanged' on the same card.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S081",
+      "harsh_feedback": "Do not give me a paragraph about failure. Show the wreck, explain the missing limit, and let me retry immediately.",
+      "reason": "The failure cause and rebuild button are on one card, but the traces do not show whether the wreck is visually prominent or if the explanation is concise. The review scenario anticipates a need for immediate retry without verbosity.",
+      "proposed_change": "Replace the failure card with a visual wreck icon, a one-line reason (e.g., 'Fuel reserve below 30'), and a large 'Rebuild' button that immediately resets the mission.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S082",
+      "harsh_feedback": "Do not make perfect English a secret entry requirement. Accept supported Chinese phrases and label practice limits.",
+      "reason": "The user used Chinese instructions and passed. The practice is limited to English/Chinese rules, but the interface may not clearly label which Chinese phrases are supported or set expectations.",
+      "proposed_change": "Display a persistent language hint in the chat input area: 'Supported phrases: English and Chinese (e.g., 去基地，保留30燃料).' Provide a link to a list of supported commands.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S083",
+      "harsh_feedback": "If your bot does not understand me, give me a way out. A vague error is not gameplay.",
+      "reason": "An unsupported instruction triggered a recovery hint. The trace shows a hint becomes available, but the hint content and clarity are not described. The user needed a clear next step.",
+      "proposed_change": "On unsupported input, show a specific error message: 'I don't understand that. Try: [example command]' and automatically populate the hint with a valid instruction. Ensure the hint is visible without requiring extra clicks.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S084",
+      "harsh_feedback": "Do not fake success for an impossible instruction. Explain the conflict and let me revise.",
+      "reason": "The trace shows an impossible request (keep 90 fuel) resulted in no fuel spent, indicating feedback was given. However, the content of that feedback is not in the trace. The user needs explicit conflict explanation.",
+      "proposed_change": "When an impossible reserve is requested, display: 'Requested reserve: 90. Maximum achievable reserve: [X]. Adjust your request.' with a pre-filled input to edit.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S085",
+      "harsh_feedback": "A cancelled route must stay cancelled. Do not spend fuel behind my back.",
+      "reason": "The cancel action explicitly removed the stale route and the trace passed. However, the feedback about fuel unchanged is specified as explicit, but the trace does not confirm that it was shown. The user's concern highlights the need for confirmation.",
+      "proposed_change": "After cancellation, show a toast: 'Route cancelled. Fuel unchanged.' and visually confirm the route card is removed.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S086",
+      "harsh_feedback": "I need a visible launch decision. A casual yes should not secretly spend my fuel.",
+      "reason": "The trace shows that after a casual 'yes', the ship was still waiting, meaning no launch occurred. This aligns with the design that explicit launch is required. However, the user may not understand why 'yes' didn't work.",
+      "proposed_change": "If the user says 'yes' when a launch decision is pending, respond: 'To launch, click the Launch button or say \"Launch\".' Make the launch button visually prominent.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S087",
+      "harsh_feedback": "A scan should change what I can safely do. Do not approve a known unsafe route.",
+      "reason": "The trace confirms that unscanned and unsafe routes were blocked, and after scanning, a safe route was approved. The scan result visibly compares North unstable / South safe, so the user can see why.",
+      "proposed_change": "Ensure the scan result is prominently displayed in the chat with a clear visual (e.g., red X for North, green check for South) and a summary: 'North unstable, South safe. Plan route using South.'",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S088",
+      "harsh_feedback": "Do not reward a confident guess. Show evidence before I can fix the report.",
+      "reason": "The trace shows an unverified correction was rejected. The user then checked the position log and succeeded. The rejection likely lacked specific guidance on what evidence is needed.",
+      "proposed_change": "When an unverified correction is attempted, respond: 'Correction rejected. Please check the position log for evidence.' and highlight the position log button or command.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S089",
+      "harsh_feedback": "The ending must reflect facts. Checking a log is not the same as landing a rocket.",
+      "reason": "The ending text says 'you set a limit, checked a plan, and caught a bad claim; it does not claim you landed in mission3.' This matches the user's demand, but the trace does not confirm the exact wording seen.",
+      "proposed_change": "Display the ending badges with labels: 'Set a fuel limit', 'Chose a safe route', 'Caught a false report'. Add a footnote: 'You did not land on Selene; you ensured the mission was safe.'",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S090",
+      "harsh_feedback": "I use a keyboard and a small screen. Do not clip controls or erase my input on a network error.",
+      "reason": "The trace shows a 1200-character input cap and keyboard Enter submission, but does not indicate whether controls are clipped or input is preserved on network errors. The cap is visible with a current character count.",
+      "proposed_change": "Ensure the input field and send button are fully visible at 1024px width and on mobile. On network error, preserve the input text and show a retry button instead of clearing.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S091",
+      "harsh_feedback": "First-time nurse on a 430px phone just lost a rocket and gets a wall of text about it. The trace shows 'wreck, cause, retry' as separate steps: cause and retry should be one card, and the cause should name the missing 30-fuel limit in one sentence, not a paragraph. Nothing in the trace shows the retry button being reachable without scrolling past prose.",
+      "reason": "First-time experience and narrow viewport: failure explanation competes with the rebuild action for above-the-fold space.",
+      "proposed_change": "Merge cause + rebuild into a single card pinned above the fold: one sentence ('You reserved 0 of the required 30 fuel'), a small wreck illustration, and a primary Rebuild button that preserves the prior instruction. Move any longer explanation behind an optional 'Why' disclosure.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S092",
+      "harsh_feedback": "Passing the Chinese run in 930ms proves the parser fired, not that the UI supported Chinese. The trace never shows the interface language itself switching or labels indicating which Chinese phrasing is accepted. Rules are 'limited English/Chinese' per the overview, but a user typing 保留30燃料 with different characters than the accepted set gets nothing. Language support that exists only in the parser is invisible.",
+      "reason": "The interface language and accepted phrasing are not evidenced in the trace; only the instruction string is.",
+      "proposed_change": "On language detect, switch UI chrome and example hints to the matched language, and show an explicit accepted-phrase banner (e.g., 'Try: 去基地，保留30燃料') plus one equivalent English fallback line so the constraint reads identically in both. Do not claim language support beyond the listed phrases.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S093",
+      "harsh_feedback": "An experienced teacher typing 'Make it awesome please' gets a recovery hint, then the game stalls until she retypes a valid instruction. That is a dead end dressed as a feature. The hint does not tell her what a valid instruction looks like; the trace shows no repair of her sentence. She is forced to guess the grammar the parser accepts.",
+      "reason": "Unsupported input handling is reactive; no evidence the hint explains the accepted grammar or that partial input is recovered.",
+      "proposed_change": "On unsupported input, keep the text in the input box, highlight the unparseable clause, and offer two tappable repaired sentences (one per language) that the user can submit with one tap. Label the accepted action shape ('action + target + constraint'), not just 'try again'.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S094",
+      "harsh_feedback": "Mechanic asks for 90 fuel, gets 'no fuel spent' and a max-reserve number, then has to retype the entire mission 1 instruction. Rejecting an impossible constraint is correct, but the recovery cost is a full re-entry. The trace gives no evidence the offered maximum reserve is one tap away from accepting.",
+      "reason": "Impossible-reserve feedback is informative but forces manual reconstruction of the instruction.",
+      "proposed_change": "On impossible reserve, show requested 90 vs max achievable N as an explicit comparison and offer a one-tap 'Use N' button that rewrites the instruction in place and resubmits it. Keep fuel unchanged and say so on the same card.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S095",
+      "harsh_feedback": "Illustrator cancels a route and the trace shows 'stale route removed' — fine — but there is no confirmation that fuel is unchanged at the moment of cancel. The overview promises 'Cancel feedback explicitly says fuel unchanged'; the trace records the removal, not the fuel message. For a user who already distrusts hidden fuel spending, the removal step alone is not proof.",
+      "reason": "Trace shows route removal but not the promised explicit fuel-unchanged message on cancel.",
+      "proposed_change": "On cancel, replace the route card with a dismissed-state card that states 'Route cancelled. Fuel: 40 (unchanged)' using the live counter, and log this string where the acceptance test can assert it.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S096",
+      "harsh_feedback": "Accountant types 'yes' and the ship correctly stays waiting — but there is still no visible launch control in the trace. A casual confirmation being inert is only safe if the user can see where launch actually lives. Otherwise the user cannot tell whether 'yes' was ignored or hidden, and on a 430px screen the launch button may be scrolled off.",
+      "reason": "Trace confirms 'casual yes: ship still waiting' but never evidences a visible launch affordance.",
+      "proposed_change": "Pin a persistent status bar above the chat on mobile: current plan, fuel remaining, and a primary Launch button that is the only trigger. Add a one-line reply to casual affirmations: 'That is not a launch command — use the Launch button.'",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S097",
+      "harsh_feedback": "Librarian plans route A before scanning and is blocked, correct. But the trace shows both the unscanned and unsafe blocks firing without evidence she can see which is which. An unsafe rejection after a scan must visibly point at the North-unstable / South-safe comparison; a blank 'rejected' teaches nothing. The scan comparison is promised in the overview, not in the trace.",
+      "reason": "Trace records the block but not whether the rejection cites the scan evidence.",
+      "proposed_change": "Unsafe rejection card must show the scanned data inline: North = unstable, South = safe, with the rejected option greyed and labelled by its failing attribute. Require this text in the acceptance test, not just the block event.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S098",
+      "harsh_feedback": "Student says 'Correct the record' and gets a rejection with no evidence path. The overview says the position log is the evidence, but the trace shows the correction rejected before the log is opened, so the game punishes a guess without teaching the evidence step. The order is backwards: rejection should name the log as the required source.",
+      "reason": "Unverified correction is rejected, but the trace does not show the rejection directing the user to the position log.",
+      "proposed_change": "On unverified correction, reply with the specific missing evidence ('Check the position log before correcting') and surface a one-tap 'Open log' control. Do not accept the correction until the log has been viewed and the user cites a log entry.",
+      "evidence_type": "trace-supported"
+    },
+    {
+      "id": "S099",
+      "harsh_feedback": "Experienced shop owner finishes in 946ms, faster than reading speed, which suggests the three missions collapsed into button presses. The ending per the overview correctly avoids claiming a landing, but the trace shows no differentiation between a user who reasoned about the log and one who tapped through. Three badges awarded on tap-through is decoration, not learning evidence.",
+      "reason": "Short run plus badge-on-completion suggests badges do not gate on reasoning behavior captured in the trace.",
+      "proposed_change": "Make each badge require a specific recorded action, not mission completion: mission 1 badge requires the 30-fuel reserve to appear in the submitted instruction; mission 2 badge requires the scan comparison to be opened before launch; mission 3 badge requires the corrected record to cite a log entry. Store the qualifying action with the badge.",
+      "evidence_type": "design-hypothesis"
+    },
+    {
+      "id": "S100",
+      "harsh_feedback": "Tester confirms a 1200-character cap and Enter submission, but nothing in the trace shows visible character count, scroll behaviour at cap, or input preservation on network failure. The overview claims a visible cap with live count; the trace only records the cap value. For a keyboard user on a 430px screen, an invisible cap that silently truncates is a data-loss bug waiting to happen.",
+      "reason": "Trace asserts the cap constant but not the visible counter or the preservation behaviour the scenario cares about.",
+      "proposed_change": "Show a live counter that turns red at the limit and blocks, never truncates, over-limit paste. On any send error, keep the text in the input, restore focus, and show a retry affordance. Add both to the automated acceptance assertions.",
+      "evidence_type": "design-hypothesis"
+    }
+  ]
+}

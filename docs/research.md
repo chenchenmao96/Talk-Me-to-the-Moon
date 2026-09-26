@@ -1,10 +1,10 @@
 # Research and design rationale
 
-The curriculum is research-informed; the learning effectiveness of this implementation has not been evaluated. Six skills are described; three missions are implemented. Completing a mission is evidence of that game outcome, not a validated learning assessment.
+The curriculum is research-informed; the learning effectiveness of this implementation has not been evaluated. Six skills inform the design; three missions are implemented. Completing a mission is evidence of that game outcome, not a validated learning assessment.
 
 | Skill | Evidence | Application and boundary |
 |---|---|---|
-| Explicit goals and constraints | Bsharat et al., Principle 25; Tankelevitch et al., goal formulation | Mission 01 uses a fuel reserve. The source models and benchmark do not establish universal effectiveness. |
+| Explicit goals and constraints | Bsharat et al., Principle 25; Tankelevitch et al., goal formulation | Mission 01 uses a fictional landing-shield fuel reserve. The source models and benchmark do not establish universal effectiveness. |
 | Relevant additional information | The Prompt Report, prompt components | Planned private-report mission. Taxonomic support, not a learning-effectiveness experiment. The metacognitive paper is not used as direct evidence for missing-information sharing. |
 | Examples | Brown et al.; Bsharat et al., Principle 7; Zamfirescu-Pereira et al. | Planned sample classification. Correct rules would also be accepted; practice with examples and actual use of examples should be measured separately. |
 | Inspectable steps | Wu et al., AI Chains, 20-person study | Mission 02 adds explicit plan approval. This authorization mechanism is a design extension. |
@@ -14,6 +14,8 @@ The curriculum is research-informed; the learning effectiveness of this implemen
 ## Incorporated review feedback
 
 - Three complete missions rather than six partially implemented chapters.
+- The revised game uses a fictional 30-fuel landing-shield threshold; failure destroys the rocket at touchdown. This consequence is a game-design decision, not a research finding.
+- Research is retained here for reviewers, but removed from the player-facing interface.
 - Deterministic state checks rather than an LLM assigning a prompt score.
 - Practice simulation and live model mode are visibly distinguished; failures do not cause silent fallback.
 - The inaccurate completion report is labeled as a scripted fault drill.
