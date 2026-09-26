@@ -31,8 +31,8 @@ export const server=http.createServer(async(req,res)=>{
    const input=await body(req);
    if(url.pathname==='/api/session'){
     if(sessions.size>=1000)return send(res,503,{error:'Mission control is full. Please try again later.'});
-    const mode=input.mode==='live'?'live':'practice';
-    if(mode==='live'&&!liveAvailable())return send(res,503,{error:'Live copilot is not configured. Practice mode remains available.'});
+    const mode=input.mode==='practice'?'practice':'live';
+    if(mode==='live'&&!liveAvailable())return send(res,503,{error:'BOLT is not connected. Configure the server’s DeepSeek key and retry.'});
     if(mode==='live'&&process.env.LIVE_ACCESS_CODE&&!safeEqual(input.accessCode,process.env.LIVE_ACCESS_CODE))return send(res,403,{error:'The live access code is not correct.'});
     const id=randomUUID(),state=createState(input.missionId||'reserve');
     const intro=state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'BOLT here! Two landing spots. One looks suspicious. Ask me to scan before we pick a route.':'Hey, I’m BOLT. Where are we going? Any limits? I pick the fastest route unless you tell me otherwise. You get the launch button.';
@@ -55,7 +55,7 @@ export const server=http.createServer(async(req,res)=>{
     try{
      const r=s.mode==='live'?await liveReply(s,input.message.trim()):practiceReply(s.state,input.message.trim());s.state=r.state;s.turns++;
      s.messages.push({role:'user',content:input.message.trim()},{role:'assistant',content:r.message});return send(res,200,snapshot(s));
-    }catch{return send(res,502,{error:'The live copilot could not respond. No actions from this turn were saved. Retry, or start a clearly labeled practice attempt.'});}
+    }catch{return send(res,502,{error:'The live copilot could not respond. No actions from this turn were saved. Your draft is kept. Please retry.'});}
     finally{s.busy=false;}
    }
    return send(res,404,{error:'Unknown endpoint.'});

@@ -1,6 +1,7 @@
 /* Synthetic browser walkthroughs, NOT real participant research.
    npm install --no-save playwright; use installed Chrome, or set PLAYWRIGHT_PATH.
    npm run build && node scripts/simulate-users.cjs [count=100] [offset=0]
+   This developer harness explicitly selects the practice API; the player UI is live-only.
    Each pair uses a fresh server so production rate limits are not disabled. */
 const {chromium}=require(process.env.PLAYWRIGHT_PATH||'playwright');
 const {spawn}=require('node:child_process');
@@ -33,7 +34,7 @@ async function waitServer(port,child){for(let i=0;i<60;i++){if(child.exitCode!==
  for(let n=b;n<Math.min(b+2,count);n++){
  const i=n+offset,k=i%10,width=[1440,390,360,1280,768,375,1366,320,1024,430][Math.floor(i/10)%10];
  const profile={id:`S${String(i+1).padStart(3,'0')}`,occupation:jobs[i%10],region:regions[Math.floor(i/10)%10],selfDescribedBackground:backgrounds[(i%10+Math.floor(i/10))%10],experience:['first-time','casual','experienced'][i%3],viewport:width,scenario:scenarios[k],harshReview:critiques[k],identityPolicy:'Fictional metadata only; behavior comes from the test scenario, never race or region.'};
- const context=await browser.newContext({viewport:{width,height:900},reducedMotion:i%10===0?'no-preference':'reduce'});const page=await context.newPage();page.setDefaultTimeout(9000);const errors=[];const steps=[];page.on('pageerror',e=>errors.push(e.message));const started=Date.now();let status='passed',failure=null;
+ const context=await browser.newContext({viewport:{width,height:900},reducedMotion:i%10===0?'no-preference':'reduce'});const page=await context.newPage();await page.route('**/api/session',r=>r.continue({postData:JSON.stringify({...r.request().postDataJSON(),mode:'practice'})}));page.setDefaultTimeout(9000);const errors=[];const steps=[];page.on('pageerror',e=>errors.push(e.message));const started=Date.now();let status='passed',failure=null;
  const checkOverflow=async()=>assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Horizontal overflow');
  const button=name=>page.getByRole('button',{name,exact:true});
  const send=async(text)=>{await page.getByLabel('YOUR TURN. WHAT SHOULD BOLT DO?').fill(text);await button('TELL BOLT ➜').click();await button('THINKING…').waitFor({state:'hidden'});steps.push('instruction: '+text)};

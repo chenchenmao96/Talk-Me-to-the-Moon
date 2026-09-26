@@ -32,9 +32,9 @@ Research has been removed from the player interface. The evidence and limitation
 
 ## Bot modes and credentials
 
-Practice mode is the default: a clearly labeled limited English/Chinese interpreter, with optional hints and editable examples. It uses no API. It is not a general chatbot.
+The player-facing game always starts with live DeepSeek. There is no Practice/Live choice. Optional hints provide examples without restricting player wording. The limited practice interpreter remains only as an explicit developer/test API mode. The synthetic browser harness requests that mode directly and does not spend live API credit.
 
-Live mode uses DeepSeek (`deepseek-flash`, configurable through `DEEPSEEK_MODEL`). Copy `.env.example` to `.env.local`, set `DEEPSEEK_API_KEY`, restart, and choose Live DeepSeek in the header settings. Messages and mission state are sent to the provider. Failures are shown explicitly; there is no silent scripted fallback.
+Live mode uses DeepSeek (`deepseek-flash`, configurable through `DEEPSEEK_MODEL`). Copy `.env.example` to `.env.local`, set `DEEPSEEK_API_KEY`, restart, and press Play. Settings only show connection information and an access-code field if required. Messages and mission state are sent to the provider. Failures are shown explicitly; there is no silent scripted fallback.
 
 Keys are server-side only. `.env.local` is ignored. For a publicly reachable live demo set `LIVE_ACCESS_CODE` and share it with testers; otherwise visitors can consume your API allowance. In-memory session limits are prototype protection, not production abuse controls. Sessions expire after an hour and reset on server restart. No database or account is required. Photon is not integrated.
 
@@ -74,3 +74,9 @@ The fictional identity fields represent coverage, not explanations of preference
 - `scripts/`: reproducible synthetic walkthrough and optional review generation.
 
 The landing-shield rule is fictional gameplay, not a claim about real spacecraft physics. A failed touchdown can reach the base coordinates while destroying the rocket; both the failure state and remaining fuel remain visible.
+
+## Live intent regression
+
+`node scripts/check-live-intent.mjs` makes six real provider calls/scenarios and consumes API credit. It checks ordinary English and Chinese destination requests, recovery from the previously observed refusal loop, preservation of unstated fuel limits, greetings, and scan-only instructions. The copilot prepares a flight immediately when asked to go to the base; scanning/planning does not require a second permission question. Launch still requires the player's button.
+
+The 100-persona report describes the earlier revision and practice-mode coverage; it did not validate live conversational behavior. The screenshot-reported refusal loop was found through real use and addressed separately.

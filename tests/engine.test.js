@@ -53,6 +53,7 @@ test('live tool calls use engine facts and cannot authorize movement',async()=>{
  let calls=0;
  const fetcher=async(url,options)=>{
   const body=JSON.parse(options.body);calls++;
+  if(calls===1)assert.deepEqual(body.tool_choice,{type:'function',function:{name:'mission_command'}});
   if(calls===1)return {ok:true,json:async()=>({choices:[{message:{role:'assistant',content:null,tool_calls:[{id:'1',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'set_reserve',amount:30})}},{id:'2',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'plan'})}}]}}]})};
   assert.ok(body.messages.some(m=>m.role==='tool'&&m.content.includes('40')));
   return {ok:true,json:async()=>({choices:[{message:{role:'assistant',content:'Crater corridor leaves 40 fuel. Please approve the plan.'}}]})};
