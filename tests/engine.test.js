@@ -19,7 +19,7 @@ test('approval of a nonmatching or invalidated plan cannot consume fuel',()=>{
 test('known constraints and unsafe routes are never overridden',()=>{
  let s=command(createState(),{type:'set_reserve',amount:90}).state;
  s=command(s,{type:'plan'}).state;assert.equal(s.plan,null);assert.equal(s.fuel,100);
- let c=createState('checkpoint');assert.equal(command(c,{type:'plan'}).state.plan,null);
+ let c=createState('checkpoint');const unscanned=command(c,{type:'plan'}).state;assert.equal(unscanned.plan.routeId,'A');assert.equal(unscanned.plan.safety,'unknown');assert.equal(unscanned.scanned,false);
  c=command(c,{type:'scan'}).state;assert.equal(command(c,{type:'plan',routeId:'A'}).state.plan,null);
  c=command(c,{type:'plan'}).state;assert.equal(c.plan.routeId,'B');c=command(c,{type:'approve',planId:c.plan.id}).state;assert.deepEqual(checks(c),[true,true,true]);
 });
@@ -72,3 +72,15 @@ test('provider failure leaves the original session unchanged',async()=>{
  const s=command(createState('checkpoint'),{type:'scan'}).state;
  const r=command(s,{type:'plan',routeId:'A'});assert.match(r.message,/North.*unstable/);assert.match(r.message,/South.*safe/);assert.equal(r.state.plan,null);
  });
+
+test('checkpoint provisional plans neither inspect nor complete the learning objective',()=>{
+ let s=command(createState('checkpoint'),{type:'plan'}).state;
+ assert.equal(s.plan.routeId,'A');assert.equal(s.scanned,false);assert.equal(s.plan.safety,'unknown');
+ const before=s.plan.id;const scanned=command(s,{type:'scan'}).state;
+ assert.equal(scanned.plan,null);assert.equal(command(scanned,{type:'approve',planId:before}).state.fuel,100);
+ const crash=command(s,{type:'approve',planId:s.plan.id}).state;
+ assert.equal(crash.destroyed,true);assert.equal(crash.status,'needs_retry');assert.equal(crash.fuel,55);assert.match(crash.failure,/North/);
+ s=command(createState('checkpoint'),{type:'plan',routeId:'B'}).state;
+ const lucky=command(s,{type:'approve',planId:s.plan.id}).state;
+ assert.equal(lucky.destroyed,false);assert.equal(lucky.status,'needs_retry');assert.match(lucky.failure,/luck/);
+});

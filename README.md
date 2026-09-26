@@ -23,7 +23,7 @@ Open http://127.0.0.1:4173. This app needs its Node server; deploying `dist/` al
 ## Play
 
 - **Fuel fail:** Keep at least 30 fuel for the fictional landing shield. The fast route leaves20: approving it breaks the rocket on touchdown, with an explosion and a one-click rebuild. The eco route leaves40 and wins. The warning comes before launch; there is no forced failure or secret phrase.
-- **Crater trouble:** Scan two sites, compare unstable North with safe South, approve a safe route.
+- **Crater trouble:** A plain travel request proposes the fastest provisional route without scanning. Both sites remain unknown. Ask to inspect safety in your own words, then review the checked route. An uninspected North launch crashes; an uninspected South landing is lucky but does not earn the inspection badge. Scanning invalidates earlier approvals.
 - **Fake finish:** An explicitly scripted faulty arrival report contradicts the position log. Check and correct it. The rocket stays at Ridge Station; verification is not portrayed as a landing.
 
 The home screen explains the three controls. Missions unlock in order. Completed badges persist in this browser; they are not evidence of learning mastery. The end screen names the actual three skills exercised. The game uses original SVG robot/rocket art inspired by chunky block-game aesthetics, not Roblox assets or a Roblox integration.
@@ -77,6 +77,12 @@ The landing-shield rule is fictional gameplay, not a claim about real spacecraft
 
 ## Live intent regression
 
-`node scripts/check-live-intent.mjs` makes six real provider calls/scenarios and consumes API credit. It checks ordinary English and Chinese destination requests, recovery from the previously observed refusal loop, preservation of unstated fuel limits, greetings, and scan-only instructions. The copilot prepares a flight immediately when asked to go to the base; scanning/planning does not require a second permission question. Launch still requires the player's button.
+`node scripts/check-live-intent.mjs` runs eight real-provider scenarios and consumes API credit. It checks ordinary English and Chinese destination requests, recovery from the previously observed refusal loop, preservation of unstated fuel limits, greetings, and scan-only instructions. A plain travel request prepares an uninspected plan. Safety inspection occurs only when the player requests evidence or an assessment of landing safety; it does not require a magic keyword. Launch still requires the player's button.
 
 The 100-persona report describes the earlier revision and practice-mode coverage; it did not validate live conversational behavior. The screenshot-reported refusal loop was found through real use and addressed separately.
+
+## 中文 / English
+
+The header language toggle translates the home screen, all three missions, map labels, controls, outcomes, logs, and connection feedback. Switching preserves the current mission and plan. The preference is stored locally and reflected in `?lang=zh` / `?lang=en`. New DeepSeek replies follow the selected Chinese locale; earlier free-form model messages remain in the language they were originally generated in. Player-authored messages are never translated silently.
+
+This revision was verified with a complete Chinese mobile walkthrough (including unknown-route crash and lucky-but-uninspected landing), a mid-mission language switch, and real DeepSeek English travel / Chinese safety requests within the Chinese interface.

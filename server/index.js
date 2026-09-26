@@ -36,9 +36,10 @@ export const server=http.createServer(async(req,res)=>{
     if(mode==='live'&&process.env.LIVE_ACCESS_CODE&&!safeEqual(input.accessCode,process.env.LIVE_ACCESS_CODE))return send(res,403,{error:'The live access code is not correct.'});
     const id=randomUUID(),state=createState(input.missionId||'reserve');
     const intro=state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'BOLT here! Two landing spots. One looks suspicious. Ask me to scan before we pick a route.':'Hey, I’m BOLT. Where are we going? Any limits? I pick the fastest route unless you tell me otherwise. You get the launch button.';
-    const s={id,state,mode,messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
+    const s={id,state,mode,language:input.language==='zh'?'zh':'en',messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
    }
    const s=sessions.get(input.sessionId);if(!s)return send(res,404,{error:'This session has expired. Start a new attempt.',expired:true});
+   if(input.language==='zh'||input.language==='en')s.language=input.language;
    s.touched=Date.now();if(s.busy)return send(res,409,{error:'The copilot is still handling the last instruction.'});
    if(input.revision!==s.state.revision)return send(res,409,{error:'The plan has changed. Please use the latest mission state.'});
    if(!allowed(s.id,20))return send(res,429,{error:'Take a breath. Try another command in a minute.'});
