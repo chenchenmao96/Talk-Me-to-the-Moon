@@ -70,7 +70,7 @@ test('provider failure leaves the original session unchanged',async()=>{
  });
  test('unsafe route feedback identifies the scan fact without inventing hazards',()=>{
  const s=command(createState('checkpoint'),{type:'scan'}).state;
- const r=command(s,{type:'plan',routeId:'A'});assert.match(r.message,/North.*unstable/);assert.match(r.message,/South.*safe/);assert.equal(r.state.plan,null);
+ const r=command(s,{type:'plan',routeId:'A'});assert.match(r.message,/North.*obstacles/);assert.match(r.message,/South.*clear/);assert.equal(r.state.plan,null);
  });
 
 test('checkpoint provisional plans neither inspect nor complete the learning objective',()=>{
@@ -79,7 +79,7 @@ test('checkpoint provisional plans neither inspect nor complete the learning obj
  const before=s.plan.id;const scanned=command(s,{type:'scan'}).state;
  assert.equal(scanned.plan,null);assert.equal(command(scanned,{type:'approve',planId:before}).state.fuel,100);
  const crash=command(s,{type:'approve',planId:s.plan.id}).state;
- assert.equal(crash.destroyed,true);assert.equal(crash.status,'needs_retry');assert.equal(crash.fuel,55);assert.match(crash.failure,/North/);
+ assert.equal(crash.destroyed,true);assert.equal(crash.status,'needs_retry');assert.equal(crash.fuel,55);assert.match(crash.failure,/North/);assert.equal(crash.location,'North obstacle field');assert.notDeepEqual(crash.coords,[20,12]);
  s=command(createState('checkpoint'),{type:'plan',routeId:'B'}).state;
  const lucky=command(s,{type:'approve',planId:s.plan.id}).state;
  assert.equal(lucky.destroyed,false);assert.equal(lucky.status,'needs_retry');assert.match(lucky.failure,/luck/);

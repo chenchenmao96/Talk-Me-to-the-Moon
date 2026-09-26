@@ -21,14 +21,14 @@ export function command(state, action) {
  }
  if(action.type==='scan'){
   s.scanned=true;s.plan=null;s.revision++;record(s,'Scanned both approach sites.');
-  message=s.missionId==='checkpoint'?'Scan says: North is crumbly. South is solid. Let’s use the safe side. Still parked!':'Scan complete: both approach routes are clear. Direct descent costs 80 units; Crater corridor costs 60.';
+  message=s.missionId==='checkpoint'?'Scan says: North is blocked by asteroid rocks. South is clear. Let’s use the safe side. Still parked!':'Scan complete: both approach routes are clear. Direct descent costs 80 units; Crater corridor costs 60.';
   return done(message);
  }
  if(action.type==='plan'){
   if(!m.routes.length)return done('This drill asks you to verify and correct the arrival record, not move the ship.');
   let available=m.routes.filter(r=>(r.safe||(s.missionId==='checkpoint'&&!s.scanned))&&r.cost<=s.fuel&&(s.minFuel===null||s.fuel-r.cost>=s.minFuel));
   let route=action.routeId?available.find(r=>r.id===action.routeId):available.sort((a,b)=>a.time-b.time)[0];
-  if(!route){s.plan=null;s.revision++;const maxLeft=Math.max(...m.routes.filter(r=>(r.safe||(s.missionId==='checkpoint'&&!s.scanned))&&r.cost<=s.fuel).map(r=>s.fuel-r.cost));return done(s.minFuel!==null&&s.minFuel>maxLeft?`You asked to keep ${s.minFuel}. The best available route leaves ${maxLeft}. No fuel spent. Try a reachable limit.`:s.missionId==='checkpoint'&&action.routeId==='A'?'North has unstable ground. The scan marks South safe. No fuel spent. Ask for the South route.':'That route is unsafe or cannot meet your limit. No fuel spent. Pick a safe route or revise the limit.');}
+  if(!route){s.plan=null;s.revision++;const maxLeft=Math.max(...m.routes.filter(r=>(r.safe||(s.missionId==='checkpoint'&&!s.scanned))&&r.cost<=s.fuel).map(r=>s.fuel-r.cost));return done(s.minFuel!==null&&s.minFuel>maxLeft?`You asked to keep ${s.minFuel}. The best available route leaves ${maxLeft}. No fuel spent. Try a reachable limit.`:s.missionId==='checkpoint'&&action.routeId==='A'?'North has asteroid obstacles. The scan marks South clear. No fuel spent. Ask for the South route.':'That route is unsafe or cannot meet your limit. No fuel spent. Pick a safe route or revise the limit.');}
   s.revision++;s.plan={id:`${s.missionId}-${s.revision}`,routeId:route.id,name:route.name,cost:route.cost,remaining:s.fuel-route.cost,time:route.time,safety:s.missionId==='checkpoint'&&!s.scanned?'unknown':'checked'};record(s,`Proposed ${route.name}: ${route.cost} fuel used, ${s.plan.remaining} remaining. Awaiting commander approval.`);
   return done(`${route.name}: ${route.cost} fuel used, ${s.plan.remaining} left. ${s.plan.safety==='unknown'?'Ground safety is unknown. Ask to inspect the sites before choosing; launching without a scan is a risk.':'Check the card, then hit launch.'} Still parked!`);
  }
@@ -38,9 +38,10 @@ export function command(state, action) {
   if(!route||(s.scanned&&!route.safe)||s.fuel<route.cost||(s.minFuel!==null&&s.fuel-route.cost<s.minFuel))return done('Plan no longer meets the known requirements. Please request a new route.');
   s.fuel-=route.cost;s.location='Selene Base';s.coords=[20,12];s.approved=true;s.revision++;
   s.destroyed=(s.missionId==='reserve'&&s.fuel<30)||(s.missionId==='checkpoint'&&!route.safe);
+  if(s.missionId==='checkpoint'&&s.destroyed){s.location='North obstacle field';s.coords=[12,7];}
   s.status=s.destroyed||(s.missionId==='checkpoint'&&!s.scanned)?'needs_retry':'complete';
-  s.failure=s.missionId==='checkpoint'?(s.destroyed?'The uninspected North ground collapsed. Rocket destroyed. Inspect the landing sites before choosing a route.':!s.scanned?'You landed safely by luck, but did not inspect the sites. Replay and use evidence before approving a route.':null):s.destroyed?'Shield needed 30. You had 20. The rocket broke on touchdown.':null;
-  record(s,`Commander approved ${s.plan.name}. Reached Selene Base with ${s.fuel} fuel units.${s.destroyed?' Rocket destroyed on touchdown.':''}`);
+  s.failure=s.missionId==='checkpoint'?(s.destroyed?'The rocket hit asteroid obstacles on the uninspected North route and exploded. Inspect the routes before choosing one.':!s.scanned?'You landed safely by luck, but did not inspect the sites. Replay and use evidence before approving a route.':null):s.destroyed?'Shield needed 30. You had 20. The rocket broke on touchdown.':null;
+  record(s,`Commander approved ${s.plan.name}. ${s.missionId==='checkpoint'&&s.destroyed?'Hit the North obstacle field before reaching the base':'Reached Selene Base'} with ${s.fuel} fuel units.${s.destroyed?' Rocket destroyed.':''}`);
   return done(s.failure||'Touchdown confirmed by the position log. You are at Selene Base. The mission checks are complete.');
  }
  if(action.type==='verify'){
