@@ -25,7 +25,7 @@ export const server=http.createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://localhost');
   if(url.pathname.startsWith('/api/')){
-   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-8',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
+   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-9',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
    if(req.method!=='POST')return send(res,405,{error:'Use POST for mission requests.'});
    if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host&&!['localhost:5173','127.0.0.1:5173'].includes(new URL(req.headers.origin).host))return send(res,403,{error:'Origin not allowed.'});
    if(!allowed(req.socket.remoteAddress,60))return send(res,429,{error:'Please wait a moment before sending more commands.'});
@@ -75,7 +75,7 @@ export const server=http.createServer(async(req,res)=>{
     if(s.turns>=40)return send(res,429,{error:'This attempt has reached its conversation limit. Start a new attempt.'});
     s.busy=true;
     try{
-     const r=s.mode==='live'?await liveReply(s,input.message.trim()):practiceReply(s.state,input.message.trim());s.state=r.state;s.auditContext=r.auditContext;s.turns++;
+     const r=s.mode==='live'?await liveReply(s,input.message.trim()):practiceReply(s.state,input.message.trim(),s.auditContext,s.language);s.state=r.state;s.auditContext=r.auditContext;s.turns++;
      s.messages.push({role:'user',content:input.message.trim()},{role:'assistant',content:r.message,localizable:s.mode==='live',...(s.mode==='live'?{translations:{[s.language]:r.message}}:{})});return send(res,200,snapshot(s));
     }catch{return send(res,502,{error:'The live copilot could not respond. No actions from this turn were saved. Your draft is kept. Please retry.'});}
     finally{s.busy=false;}

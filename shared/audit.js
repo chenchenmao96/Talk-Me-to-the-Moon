@@ -10,10 +10,10 @@ export function auditCommand(state,a){
  const out=message=>({state:s,message});
  if(!r||s.status!=='active')return out('This audit is already complete.');
  if(a.type==='verify'){
-  s.verified=true;s.revision++;s.history.push({id:s.history.length+1,text:r.evidence});
-  return out(r.evidence+' Compare this record with the report. Tell BOLT your verdict and cite the record. Reading alone does not submit a verdict.');
+  if(!s.verified){s.verified=true;s.revision++;s.history.push({id:s.history.length+1,text:r.evidence});}
+  return out(r.evidence+' Compare this record with the report. Tell BOLT accept, reject, or unknowable, and explain your reason. Reading alone does not submit a verdict.');
  }
- if(a.type==='reconcile')return out('A correction button cannot decide for you. Tell BOLT whether the report is supported, contradicted, or uncertain, with its record ID and the relevant fact.');
+ if(a.type==='reconcile')return out('A correction button cannot decide for you. Tell BOLT whether the report is supported, contradicted, or uncertain, with the relevant fact. You do not need to repeat a record ID.');
  if(a.type==='submit_audit'){
   if(!s.verified)return out('Read the relevant record first. Then compare it with the claim.');
   if(a.reportId!==r.id||a.recordId!==r.record)return out('This evidence belongs to a different report. Compare the current report with its own record.');
