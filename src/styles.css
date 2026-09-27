@@ -34,3 +34,13 @@
 .scenario-board article.launch-day{box-shadow:0 0 0 4px #ff826d}
 .unsurveyed text{font-family:inherit}
 @media(max-width:720px){.reference-cards,.tray-picks{grid-template-columns:repeat(2,1fr)}}
+/* Keep route status outside the moving map, readable at every viewport size. */
+.flight-world.world{aspect-ratio:auto}.scene-map{position:relative;aspect-ratio:900/480}.scene-map>svg{position:absolute;inset:0}
+.route-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px;background:#2e3458;border-top:2px solid #7981b5;color:#fff6db}
+.route-legend>div{display:flex;flex-direction:column;gap:6px;min-width:0;padding:10px;border:1px solid #777fa8;border-radius:7px;background:#23294b}
+.route-legend b{font-size:13px}.route-legend span{font-size:12px;line-height:1.5}.route-legend strong{font-size:11px;color:#ffe4a0;line-height:1.5}.route-legend .blocked{color:#ffb89c}.route-legend .clear{color:#c5ff7b}
+.sound-toggle{display:flex;align-items:center;gap:7px;background:#e7f4cc;border-radius:6px;padding:10px 12px;font-size:11px;white-space:nowrap}.sound-toggle>span:first-child{font-size:18px;line-height:1}.sound-toggle[aria-pressed="false"]{background:#eee9dd}.header-right{gap:14px}
+.game-grid>*{min-width:0}.reference-cards>div,.specimen,.scenario-board article{min-width:0;overflow-wrap:anywhere}.reference-cards span:not(.sample-shape),.specimen>span:not(.sample-shape){text-align:center}
+@media(min-width:721px) and (max-width:1100px){.game-grid{grid-template-columns:minmax(0,1fr)}.scenario-board{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){header{height:auto;min-height:77px;gap:12px;flex-wrap:wrap;padding:14px 18px}.header-right{gap:6px;flex-wrap:wrap;justify-content:flex-end}.sound-toggle{padding:8px;font-size:10px}.sound-toggle>span:first-child{font-size:14px}.route-legend{gap:8px;padding:10px}.route-legend>div{padding:8px}.route-legend b{font-size:12px}.route-legend span,.route-legend strong{font-size:11px}.scene-caption{font-size:10px;bottom:6px;line-height:1.3}.specimen-batch{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){header{align-items:center}.header-right{width:100%;justify-content:space-between}.game-heading{flex-wrap:wrap}.game-heading>div{min-width:0}.game-heading h1{max-width:none}.plan-numbers{gap:12px}.scenario-board article{grid-template-columns:30px minmax(0,1fr) auto;column-gap:6px}.scenario-board strong{font-size:9px;padding:4px}.scenario-board h3{font-size:13px}.scene-caption{position:static;padding:10px;background:#a29bc7}.scene-map{aspect-ratio:auto;display:flex;flex-direction:column}.scene-map>svg{position:static;aspect-ratio:900/480;height:auto}.audit-stamps{flex-wrap:wrap}}

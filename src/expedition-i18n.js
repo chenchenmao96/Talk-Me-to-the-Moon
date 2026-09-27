@@ -1,4 +1,6 @@
 export const expeditionZh={
+'Enable sound effects':'开启音效','Mute sound effects':'关闭音效','SOUND OFF':'音效关','SOUND ON':'音效开',
+'Route information':'路线信息','A · NORTH':'A · 北线','B · SOUTH':'B · 南线','45 fuel · 3 minutes':'45 燃料 · 3 分钟','55 fuel · 6 minutes':'55 燃料 · 6 分钟','BLOCKED BY ROCKS':'岩石阻挡','NOT SURVEYED':'尚未勘测','CLEAR ROUTE':'路线畅通',
 'Could not switch languages. Your mission is unchanged. Please retry.':'切换语言失败，关卡进度保持不变，请重试。',
 'Our university expedition needs to land at Selene Base. Your private flight brief: the landing shield needs at least 30 fuel left on arrival, or the rocket breaks. BOLT has not seen this brief.':'大学科研队要降落月球基地。你的私人飞行简报：抵达时至少要剩 30 燃料，否则降落护盾失效，火箭会损毁。BOLT 没看过这份简报。',
 'The base is open. Move our research instrument across the canyon to the depot. Your private manifest is on screen; BOLT cannot see it.':'基地已启用，要把科研设备运过峡谷送到仓库。你的私人货单在画面上，BOLT 看不到。',
