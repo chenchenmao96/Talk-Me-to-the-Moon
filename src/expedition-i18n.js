@@ -1,4 +1,6 @@
 export const expeditionZh={
+'80 fuel · 4 minutes':'80 燃料 · 4 分钟','60 fuel · 7 minutes':'60 燃料 · 7 分钟','Ask BOLT for route details.':'向 BOLT 查询路线信息。','Capacity: 3 tonnes':'承重：3 吨','Capacity: 6 tonnes':'承重：6 吨','Ask BOLT for bridge limits.':'向 BOLT 查询桥梁承重。',
+'BACK TO MAP ↑':'返回任务地图 ↑',
 'Enable sound effects':'开启音效','Mute sound effects':'关闭音效','SOUND OFF':'音效关','SOUND ON':'音效开',
 'Route information':'路线信息','A · NORTH':'A · 北线','B · SOUTH':'B · 南线','45 fuel · 3 minutes':'45 燃料 · 3 分钟','55 fuel · 6 minutes':'55 燃料 · 6 分钟','BLOCKED BY ROCKS':'岩石阻挡','NOT SURVEYED':'尚未勘测','CLEAR ROUTE':'路线畅通',
 'Could not switch languages. Your mission is unchanged. Please retry.':'切换语言失败，关卡进度保持不变，请重试。',

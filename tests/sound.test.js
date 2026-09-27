@@ -9,7 +9,7 @@ function harness(saved='false'){
  const source=()=>{const s={...node(),frequency:param(),start(t){assert.ok(t>=0);s.started=true;},stop(){s.stopped=true;}};sources.push(s);return s;};
  const context={state:'running',currentTime:0,sampleRate:8000,destination:{},createGain:()=>({...node(),gain:param()}),createOscillator:source,createBufferSource:source,createBiquadFilter:()=>({...node(),frequency:param()}),createBuffer:(_,length)=>({getChannelData:()=>new Float32Array(length)})};
  const sound=createSoundEngine({createContext:()=>{contexts++;return context;},storage:()=>({getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)}),hidden:()=>hidden});
- return {sound,sources,values,contexts:()=>contexts,hide:()=>{hidden=true;}};
+ return {sound,sources,values,context,contexts:()=>contexts,hide:()=>{hidden=true;}};
 }
 test('sound requires a gesture, reuses one audio context and respects mute and hidden tabs',()=>{
  const h=harness();h.sound.play('launch');assert.equal(h.contexts(),0);assert.equal(h.sources.length,0);
@@ -29,4 +29,9 @@ test('all arcade cues schedule finite, bounded sounds and tests use outcome feed
  assert.equal(feedbackCue({trialRuns:0},{status:'active',trialRuns:1,plan:{id:'p'},trialResults:[{planId:'p',pass:false}]}),'warning');
  assert.equal(feedbackCue({sortRuns:0},{status:'active',sortRuns:1,sortResults:[{pass:false}]}),'warning');
  assert.equal(feedbackCue({}, {status:'complete'}),null);
+});
+
+test('an interrupted audio context resumes on the next user gesture',()=>{
+ const h=harness();let resumed=0;h.context.state='interrupted';h.context.resume=async()=>{resumed++;h.context.state='running';};
+ h.sound.unlock();h.sound.play('reply');assert.equal(resumed,1);assert.ok(h.sources.length>0);
 });

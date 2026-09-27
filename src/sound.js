@@ -9,7 +9,7 @@ export function createSoundEngine({createContext=()=>new (window.AudioContext||w
   try{
    if(!context){context=createContext();master=context.createGain();master.gain.value=.18;master.connect(context.destination);}
    unlocked=true;
-   if(context.state==='suspended')context.resume().catch(()=>{});
+   if(context.state==='suspended'||context.state==='interrupted')context.resume().catch(()=>{});
   }catch{unlocked=false;}
  }
  function tone(at,duration,frequency,end=frequency,type='triangle',level=.35){
