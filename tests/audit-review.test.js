@@ -13,6 +13,39 @@ function atReport(index){const s=session();for(let i=0;i<index;i++){
  s.state=command(s.state,{type:'submit_audit',reportId:['R1','R2'][i],recordId:['POS-17','POWER-18'][i],verdict:['contradicted','supported'][i]}).state;
 }return s;}
 
+test('R1 accepts a named location mismatch, including the learner’s typo, without copied coordinates',async()=>{
+ for(const text of [
+  'r1 is not correct as the locaiton is not right',
+  'R1 is not correct as the location is not right',
+  'R1 is wrong because the position is incorrect.',
+  'Reject R1 because the coordinates do not match.',
+  'R1 is not right because it gives the wrong location.',
+  'R1 is wrong because the loaction is different.',
+  'R1不对，因为位置不对。'
+ ]){
+  const assessment=assessAudit('R1',text);
+  assert.equal(assessment.verdict,'contradicted',text);assert.equal(assessment.evidence,true,text);
+  const s=session(),out=await liveReply(s,text,noProvider);
+  assert.equal(out.state.auditIndex,1,text);assert.equal(out.state.auditFindings.length,1,text);
+  assert.match(out.message,/R1 review saved/);
+  assert.equal(practiceReply(s.state,text).state.auditIndex,1,text);
+ }
+});
+
+test('a circular rejection, a question, or an unrelated mismatch still needs a report-specific reason',async()=>{
+ const fake=async()=>response({content:'Correct!'});
+ for(const text of [
+  'R1 is wrong because it is wrong.',
+  'R1 is incorrect because the color is wrong.',
+  'R1 is wrong because the location is not wrong.',
+  'Is R1 wrong because the location is incorrect?',
+  'R1 is wrong because the location is correct.'
+ ]){
+  const out=await liveReply(session(),text,fake);
+  assert.equal(out.state.auditIndex,0,text);assert.doesNotMatch(out.message,/saved|green/,text);
+ }
+});
+
 test('unverified claims with pending evidence complete R3 in one turn, including the reported phrase',async()=>{
  for(const text of [
   'R3 is not verified as the result is pending',

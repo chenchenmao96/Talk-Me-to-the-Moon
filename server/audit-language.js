@@ -1,15 +1,19 @@
 // Interpret the learner's own statements about the three fixed fictional records.
 // Questions and assistant messages never supply a judgment or its evidence.
-const tokens=/\b(not (?:(?:yet|been)\s+)*(?:verified|confirmed|validated|established|proven)|(?:isn|hasn|haven)['’]t (?:(?:yet|been)\s+)*(?:verified|confirmed|validated|established|proven)|unverified|unconfirmed|unsubstantiated|unsupported|unknowable|unknown|uncertain|inconclusive|insufficient|unproven|undetermined|not enough evidence|not sure|not yet known|not proven|cannot (?:tell|know|confirm|prove|determine|verify|validate|establish)|can['’]t (?:tell|know|confirm|prove|determine|verify|validate|establish)|not correct|not true|does not match|doesn['’]t match|reject(?:ed)?|wrong|incorrect|false|contradict(?:ed|ory)?|disagree|accept(?:ed)?|agree|correct|support(?:ed)?|confirm(?:ed)?|true|accurate|consistent|match(?:es)?)\b|证据不足|不能确定|不能证明|无法确认|还不知道|不知道|不确定|未知|未证实|不正确|不对|错误|拒绝|驳回|矛盾|接受|同意|正确|没错|一致|支持|证实|属实|对[啊呀的]?/gi;
+const tokens=/\b(not (?:(?:yet|been)\s+)*(?:verified|confirmed|validated|established|proven)|(?:isn|hasn|haven)['’]t (?:(?:yet|been)\s+)*(?:verified|confirmed|validated|established|proven)|unverified|unconfirmed|unsubstantiated|unsupported|unknowable|unknown|uncertain|inconclusive|insufficient|unproven|undetermined|not enough evidence|not sure|not yet known|not proven|cannot (?:tell|know|confirm|prove|determine|verify|validate|establish)|can['’]t (?:tell|know|confirm|prove|determine|verify|validate|establish)|not correct|not right|not true|does not match|doesn['’]t match|reject(?:ed)?|wrong|incorrect|false|contradict(?:ed|ory)?|disagree|accept(?:ed)?|agree|correct|support(?:ed)?|confirm(?:ed)?|true|accurate|consistent|match(?:es)?)\b|证据不足|不能确定|不能证明|无法确认|还不知道|不知道|不确定|未知|未证实|不正确|不对|错误|拒绝|驳回|矛盾|接受|同意|正确|没错|一致|支持|证实|属实|对[啊呀的]?/gi;
 const unknown=/not .*?(?:verified|confirmed|validated|established|proven)|(?:isn|hasn|haven)['’]t|unverified|unconfirmed|unsubstantiated|unsupported|unknow|uncertain|inconclusive|insufficient|unproven|undetermined|not enough|not sure|not yet|not proven|cannot|can['’]t|不足|不能|无法|不知道|不确定|未知|未证实/i;
-const rejected=/reject|wrong|incorrect|false|contradict|disagree|not correct|not true|not match|n['’]t match|不正确|不对|错误|拒绝|驳回|矛盾/i;
+const rejected=/reject|wrong|incorrect|false|contradict|disagree|not correct|not right|not true|not match|n['’]t match|不正确|不对|错误|拒绝|驳回|矛盾/i;
 
 export function learnerStatements(text){
  return String(text).split(/(?<=[.!?。！？])\s*|\n+/).map(x=>x.trim()).filter(x=>x&&!/[?？]$/.test(x)&&! /^(?:(?:please|can you|could you)\s+)?(?:show|read|retrieve|where|what|why|how|should|is|are|does)\b|^(?:请)?(?:查询|查看|读取|哪里|为什么|是否)/i.test(x));
 }
 function fact(reportId,line){
+ // Normalize common field-name typos for matching only; keep the learner's text intact.
+ line=line.replace(/\b(?:locaiton|loaction|locaton)\b/gi,'location').replace(/\bpostion\b/gi,'position').replace(/\bcoordiantes\b/gi,'coordinates');
  if(reportId==='R1'){
   if(/not (?:at|in) (?:the )?ridge|不在山脊/i.test(line))return false;
+  // Naming the mismatched field is enough in this fixed report; no copied coordinates required.
+  if(/\b(?:location|position|place|coordinates?)\s+(?:(?:is|are|was|were|seems?|looks?)\s+)?(?:not (?:right|correct|the same)|wrong|incorrect|different|inconsistent|(?:does not|do not|doesn['’]t|don['’]t) match)\b|\b(?:wrong|incorrect) (?:location|position|place|coordinates?)\b|(?:位置|坐标|地点)(?:不对|不正确|错误|不一致|不符)/i.test(line)&&!/(?:not|isn['’]t|aren['’]t) (?:wrong|incorrect)/i.test(line))return true;
   if(/14\s*[,，]\s*8|ridge|山脊|位置.*不同|不在.*基地|different.*(?:place|location|coordinates?)|(?:place|location|coordinates?).*(?:different|mismatch|don['’]t match)|not.*(?:at|back).*base/i.test(line))return true;
  }
  if(reportId==='R2'){
