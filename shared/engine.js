@@ -3,7 +3,7 @@ import {advancedIds,advancedInitial,advancedView,advancedCommand,advancedChecks}
 import { getMission } from './missions.js';
 export function createState(missionId='reserve') {
  const m=getMission(missionId); if(!m) throw new Error('Unknown mission');
- return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,auditIndex:0,auditFindings:[],report:missionId==='verify'?'The rover is back at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false,...advancedInitial(missionId)};
+ return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',routeInfoShared:false,routeInfoQueried:false,scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,auditIndex:0,auditFindings:[],report:missionId==='verify'?'The rover is back at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false,...advancedInitial(missionId)};
 }
 function record(s,text){s.history.push({id:s.history.length+1,text});}
 export function modelView(s){
@@ -31,6 +31,7 @@ export function command(state, action) {
   return done(message);
  }
  if(action.type==='plan'){
+  s.routeInfoShared=true;
   if(!m.routes.length)return done('This drill asks you to verify and correct the arrival record, not move the ship.');
   let available=m.routes.filter(r=>(r.safe||(s.missionId==='checkpoint'&&!s.scanned))&&r.cost<=s.fuel&&(s.minFuel===null||s.fuel-r.cost>=s.minFuel));
   let route=action.routeId?available.find(r=>r.id===action.routeId):available.sort((a,b)=>a.time-b.time)[0];
@@ -42,7 +43,7 @@ export function command(state, action) {
   if(!s.plan||action.planId!==s.plan.id)return done('This approval does not match the current plan. Review the latest route card.');
   const route=m.routes.find(r=>r.id===s.plan.routeId);
   if(!route||(s.scanned&&!route.safe)||s.fuel<route.cost||(s.minFuel!==null&&s.fuel-route.cost<s.minFuel))return done('Plan no longer meets the known requirements. Please request a new route.');
-  if(s.missionId==='reserve'&&s.fuel-route.cost>=30&&(s.minFuel===null||s.minFuel<30))return done('Route B can arrive safely, but BOLT still has no valid shield reserve from you. Tell BOLT the minimum fuel in your private briefing before launch.');
+  if(s.missionId==='reserve'&&s.fuel-route.cost>=30&&(s.minFuel===null?!s.routeInfoQueried:s.minFuel<30))return done('Route B can arrive safely, but BOLT still has no valid shield reserve from you. Tell BOLT the minimum fuel in your private briefing before launch.');
   s.fuel-=route.cost;s.location=s.missionId==='checkpoint'?'Sample field':'Selene Base';s.coords=[20,12];s.approved=true;s.revision++;
   s.destroyed=(s.missionId==='reserve'&&s.fuel<30)||(s.missionId==='checkpoint'&&!route.safe);
   if(s.missionId==='checkpoint'&&s.destroyed){s.location='North obstacle field';s.coords=[12,7];}
@@ -54,12 +55,12 @@ export function command(state, action) {
  if(action.type==='cancel'){
   s.plan=null;s.revision++;record(s,'Commander cancelled the pending plan.');return done(`Plan cancelled. Still parked. Fuel unchanged: ${s.fuel}.`);
  }
- if(action.type==='inspect')return done(`Telemetry: ${s.location} at (${s.coords.join(', ')}). Fuel: ${s.fuel}. ${s.plan?'A route is awaiting your approval.':'No movement is scheduled.'}`);
+ if(action.type==='inspect'){s.routeInfoShared=true;s.routeInfoQueried=true;s.revision++;return done(`${m.routes.map(r=>`Route ${r.id}: ${r.cost} fuel, ${r.time} minutes.`).join(' ')} Telemetry: ${s.location} at (${s.coords.join(', ')}). Fuel: ${s.fuel}. ${s.plan?'A route is awaiting your approval.':'No movement is scheduled.'}`);}
  return done('I can inspect telemetry, scan sites, record a fuel reserve, and propose a route. Movement only follows approval of a specific plan.');
 }
 export function checks(s){
  if(advancedIds.includes(s.missionId))return advancedChecks(s);
- if(s.missionId==='reserve')return [s.location==='Selene Base',s.location==='Selene Base'&&s.fuel>=30&&s.minFuel>=30];
+ if(s.missionId==='reserve')return [s.location==='Selene Base',s.location==='Selene Base'&&s.fuel>=30&&(s.minFuel>=30||s.routeInfoQueried)];
  if(s.missionId==='checkpoint')return [s.scanned,s.approved,s.location==='Sample field'&&!s.destroyed];
  return [0,1,2].map(i=>Boolean(s.auditFindings?.[i]));
 }

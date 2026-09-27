@@ -104,3 +104,21 @@ test('provider tool markup is never shown as a successful chat response',async()
  const fake=async()=>({ok:true,json:async()=>({choices:[{message:{role:'assistant',content:'<｜｜DSML｜｜ calls> broken tool call'}}]})});
  await assert.rejects(liveReply({state:createState('iterate'),messages:[]},'test',fake),/tool markup/);
 });
+
+test('route data is disclosed only after the copilot reads it or proposes a plan',()=>{
+ for(const id of ['reserve','context']){
+  const s=createState(id);assert.equal(s.routeInfoShared,false);
+  const inspected=command(s,{type:'inspect'});assert.equal(inspected.state.routeInfoShared,true);
+  assert.ok(inspected.message.includes(id==='reserve'?'80':'capacity'));
+  assert.equal(command(s,{type:'plan'}).state.routeInfoShared,true);
+ }
+});
+
+test('asking for route evidence then choosing B is valid collaboration, without a mandatory sentence',()=>{
+ for(const id of ['reserve','context']){
+  let s=command(createState(id),{type:'inspect'}).state;
+  s=command(s,{type:'plan',routeId:'B'}).state;
+  s=command(s,{type:'approve',planId:s.plan.id}).state;
+  assert.equal(s.status,'complete');assert.ok(checks(s).every(Boolean));
+ }
+});

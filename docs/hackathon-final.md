@@ -21,4 +21,8 @@ The live LLM interprets meaning; it can err. Bounded input checks and determinis
 
 ## Release checks
 
-Run the current unit/API suite, production build, bilingual browser harness and bounded live-provider tests listed in the README. Review the generated screenshots. Confirm the deployed health endpoint reports `expedition-3` before presenting the new URL as released.
+Run the current unit/API suite, production build, bilingual browser harness and bounded live-provider tests listed in the README. Review the generated screenshots. Confirm the deployed health endpoint reports `expedition-4` before presenting the new URL as released.
+
+
+## Information split in missions 1 and 2
+The opening map labels only A and B; it does not identify a fuel-saving route or show bridge load ratings. Players have the shield requirement or cargo mass. BOLT has the route costs or bridge capacities. After the copilot retrieves data or proposes a route, the map may display that information for review. A player who explicitly obtains the data and chooses a physically valid route can also complete the mission without repeating a prescribed constraint sentence. Mission 6 remains unchanged pending a clearer capstone design.

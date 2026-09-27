@@ -1,10 +1,15 @@
 export const expeditionZh={
+'Compare this route with your private shield requirement.':'请把这条路线的剩余燃料与你的护盾要求对照。','CHECK YOUR MANIFEST':'由你对照货单确认',
+'The shield held! You connected your mission requirement with BOLT’s route data. Share constraints with AI, or ask for the facts you need to make your own decision.':'护盾撑住了！你结合任务要求与 BOLT 的路线数据作出了决定。你可以告诉 AI 限制，也可以先询问数据、再自己判断。',
+'The cargo arrived intact. You combined the cargo manifest with BOLT’s bridge data. Sharing your context and asking for missing facts are both useful ways to work with AI.':'设备完整送达！你结合了货单和 BOLT 的桥梁数据。告诉 AI 你的情况，或向它询问缺少的信息，都是有效的合作方式。',
+
+'A · ASK BOLT':'A · 向 BOLT 询问','ASK BOLT':'向 BOLT 询问','B · ASK BOLT':'B · 向 BOLT 询问','A · 80 FUEL · 4 MIN':'A · 80 燃料 · 4 分钟','60 FUEL · 7 MIN':'60 燃料 · 7 分钟','Two cargo bridges: A holds 3 tonnes and B holds 6.':'BOLT 的桥梁数据：A 承重3吨，B承重6吨。','Two bridges labeled A and B. Ask BOLT for their load limits.':'两座桥分别标为A和B，请向BOLT询问承重。',
 'ROVER DAMAGED.':'探测车损毁。','SAMPLE FIELD REACHED!':'抵达采样地！','Inspect the route. Then send the rover.':'先检查路线，再让探测车出发。','ROVER ENERGY':'探测车能量','Inspected both field routes.':'已检查两条采样路线。',
 'Moon landing':'月球着陆','Research cargo':'科研设备','Field route':'采样路线','Sample lab':'样本实验室','Evidence desk':'证据审核','Return launch':'返程发射',
 'STICK THE LANDING.':'稳稳落在月球上。','PRECIOUS CARGO.':'科研设备，轻拿轻放。','ROCKS AHEAD.':'前方有岩石。','SORT THE MOON HAUL.':'整理月球收获。','PROVE IT, BOLT.':'BOLT，拿出依据。','BRING IT HOME.':'带着成果回家。',
 'State a useful constraint':'练习：说清楚限制','Share missing context':'练习：补充关键信息','Inspect before acting':'练习：先检查，再行动','Teach with examples':'练习：用示例表达标准','Judge claims using evidence':'练习：用证据判断报告','Combine, revise and retest':'综合：组合、修订、复测',
-'Our university expedition needs to land at Selene Base. Your private flight brief: keep at least 30 fuel for the shield. Tell BOLT the limit, review its route, then launch.':'大学科研队要降落月球基地。你的私人简报：护盾至少需要保留 30 燃料。把限制告诉 BOLT，检查路线，再发射。',
-'The base is open. Move our research instrument across the canyon. Your private manifest says 4 tonnes; BOLT only has bridge capacities. Share the missing fact, review the plan, then deliver.':'基地已启用，要把科研设备运过峡谷。你的私人货单写着 4 吨；BOLT 只有桥梁承重信息。补充缺失的信息，检查方案，再运送。',
+'Our university expedition needs to land at Selene Base. Your private flight brief: keep at least 30 fuel for the shield. You know the shield requirement; BOLT knows route costs. Share your limit and ask which route meets it.':'大学科研队要降落月球基地。你的私人简报：护盾至少需要保留 30 燃料。你知道护盾要求；BOLT 知道路线耗油。告诉它要求，再问哪条路线符合。',
+'The base is open. Move our research instrument across the canyon. Your private manifest says 4 tonnes; BOLT only has bridge capacities. You know the mass; BOLT knows the load limits. Share the cargo mass and ask which bridge can carry it.':'基地已启用，要把科研设备运过峡谷。你的私人货单写着 4 吨；BOLT 只有桥梁承重信息。你知道重量；BOLT 知道承重。把货重告诉它，再让它解释哪座桥能过。',
 'Our rover is ready to collect sample containers. Rocks are already visible on A. Ask BOLT to inspect both routes, review the evidence, then approve the trip to the sample field.':'探测车准备收集样本容器。A 路线的岩石已经可见。让 BOLT 检查两条路线，审阅证据，再批准前往采样地。',
 'P1–P4 are back in the lab. Our fictional handling code: blue round → KEEP; orange round → KEEP; blue spiky → REJECT. Teach BOLT with contrasting examples, then test the sorter.':'P1–P4 已回到实验室。虚构处理规则：蓝色圆形→保留；橙色圆形→保留；蓝色尖刺→剔除。用对比示例教 BOLT，再测试分拣机。',
 'Before we send the expedition report home, audit three claims. Ask for each record. Compare the claim with the record. Tell BOLT whether it is right, wrong, or not yet knowable, and why. You can talk naturally across messages.':'把科研报告发回地球前，核查三条说法。先查记录，再用自己的话说：这句话对不对？为什么？可以分几句聊，不用抄编号。',

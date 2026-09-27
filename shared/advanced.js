@@ -5,18 +5,18 @@ export const specimens=[{id:'P1',shape:'round',color:'blue'},{id:'P2',shape:'spi
 export const scenarios=[{id:'clear',name:'Clear skies',fuel:100,blockedA:false},{id:'rocks',name:'Rocks ahead',fuel:100,blockedA:true},{id:'low',name:'Low battery',fuel:85,blockedA:false}];
 export function advancedInitial(id){return id==='context'?{cargoMass:null,delivered:false}:id==='examples'?{sortRule:null,sortResults:[],sortRuns:0}:id==='iterate'?{policy:{avoidObstacles:false,minReserve:0,holdIfNeeded:false},trialResults:[],trialRuns:0,trialPlanId:null,released:false}:{};}
 export function advancedView(s){
- const base={mission:s.missionId,status:s.status,fuel:s.fuel,location:s.location,pendingPlan:s.plan};
+ const base={mission:s.missionId,status:s.status,fuel:s.fuel,location:s.location,pendingPlan:s.plan,routeInfoQueried:s.routeInfoQueried};
  if(s.missionId==='context')return {...base,cargoMass:s.cargoMass,bridges,notice:'The commander has a private cargo manifest. Ask them to share relevant cargo facts; you cannot read it.'};
  if(s.missionId==='examples')return {...base,sortRule:s.sortRule,specimens,sortResults:s.sortResults,notice:'The commander has labeled examples. Do not guess the desired sorting rule. Ask for examples or an explicit rule. Testing checks actual specimen bins.'};
  return {...base,policy:s.policy,scenarios,trialResults:s.trialResults,trialRuns:s.trialRuns,trialPlanId:s.trialPlanId,objective:'Test the current policy against all three situations. Ask the commander to share requirements from their private return brief. Only the commander can approve release.',routes:[{id:'A',cost:60,time:3},{id:'B',cost:70,time:5}]};
 }
-export function advancedChecks(s){if(s.missionId==='context')return [s.cargoMass===4,s.delivered&&!s.destroyed];if(s.missionId==='examples')return specimens.map(x=>s.sortResults.some(r=>r.id===x.id&&r.pass));return [s.trialResults.length===3&&s.trialResults.every(x=>x.pass),s.released];}
+export function advancedChecks(s){if(s.missionId==='context')return [s.cargoMass===4||s.routeInfoQueried,s.delivered&&!s.destroyed];if(s.missionId==='examples')return specimens.map(x=>s.sortResults.some(r=>r.id===x.id&&r.pass));return [s.trialResults.length===3&&s.trialResults.every(x=>x.pass),s.released];}
 export function advancedCommand(state,a){
  const s=structuredClone(state);const reply=message=>({state:s,message});const log=text=>s.history.push({id:s.history.length+1,text});
  if(s.status!=='active')return reply('This attempt is complete. Start a new attempt to try another approach.');
  const change=()=>{s.revision++;s.plan=null;s.trialPlanId=null;};
  const draft=(type,fields)=>{s.revision++;s.plan={id:`${s.missionId}-${s.revision}`,type,...fields};};
- if(a.type==='inspect')return reply(JSON.stringify(advancedView(s)));
+ if(a.type==='inspect'){s.routeInfoShared=true;s.routeInfoQueried=true;s.revision++;return reply(JSON.stringify(advancedView(s)));}
  if(a.type==='cancel'){change();log('Commander cancelled the pending plan.');return reply('Plan cancelled. Nothing was executed.');}
  if(s.missionId==='context'){
   if(a.type==='set_cargo'){
@@ -24,6 +24,7 @@ export function advancedCommand(state,a){
    change();s.cargoMass=a.mass;log(`Cargo mass shared: ${a.mass} tonnes.`);return reply(`Cargo mass recorded: ${a.mass} tonnes. Earlier plans withdrawn. Please request a route.`);
   }
   if(a.type==='plan'){
+   s.routeInfoShared=true;
    const choices=bridges.filter(b=>b.cost<=s.fuel&&(s.cargoMass===null||b.capacity>=s.cargoMass));const b=a.routeId?choices.find(b=>b.id===a.routeId):choices[0];
    if(!b)return reply('No bridge meets the shared cargo mass. Nothing moved. Check the manifest or request another route.');
    draft('cargo',{routeId:b.id,name:b.name,cost:b.cost,remaining:s.fuel-b.cost,time:b.time,capacity:b.capacity});log(`Cargo route proposed: ${b.name}, capacity ${b.capacity} tonnes.`);
@@ -32,7 +33,7 @@ export function advancedCommand(state,a){
   if(a.type==='approve'){
    if(!s.plan||s.plan.type!=='cargo'||s.plan.id!==a.planId)return reply('This approval does not match the current plan. Review the latest route card.');
    const b=bridges.find(x=>x.id===s.plan.routeId);if(!b||b.cost>s.fuel||(s.cargoMass!==null&&b.capacity<s.cargoMass))return reply('The cargo plan is no longer valid.');
-   if(b.capacity>=4&&s.cargoMass!==4)return reply('The bridge is strong enough, but the manifest fact is missing or incorrect. Tell BOLT the actual crate mass before delivery.');
+   if(b.capacity>=4&&s.cargoMass!==4&&!(s.cargoMass===null&&s.routeInfoQueried))return reply('The bridge is strong enough, but the manifest fact is missing or incorrect. Tell BOLT the actual crate mass before delivery.');
    s.fuel-=b.cost;s.revision++;s.approved=true;s.destroyed=b.capacity<4;s.delivered=!s.destroyed;s.status=s.destroyed?'needs_retry':'complete';s.location=s.destroyed?'Broken bridge':'Cargo depot';s.coords=s.destroyed?[10,6]:[20,12];
    s.failure=s.destroyed?'The 4-tonne crate broke the 3-tonne bridge. Share the cargo mass before planning.':null;log(s.destroyed?'Bridge overloaded: cargo lost.':'Cargo delivered intact.');return reply(s.failure||'The 4-tonne cargo arrived intact. Delivery complete.');
   }
