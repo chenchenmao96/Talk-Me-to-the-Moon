@@ -1,0 +1,12 @@
+.lesson-reopen{display:block;width:100%;margin:16px 0}
+.lesson-dialog{width:min(620px,calc(100% - 24px));text-align:left;padding:28px;color:var(--ink);background:var(--paper)}
+.lesson-dialog .lesson-earned{display:block;padding-right:36px;font-size:12px;font-weight:900;color:#42671c;letter-spacing:.5px}
+.lesson-dialog h2{margin:10px 0 20px;font-size:clamp(23px,4vw,30px);line-height:1.15;outline:none}
+.lesson-dialog h3{font-size:12px;letter-spacing:.4px;line-height:1.5;margin:0 0 6px}
+.lesson-dialog p{font-size:15px;line-height:1.55;margin:0}
+.lesson-block{margin:18px 0}
+.lesson-example{padding:16px;background:#eaeaff;border:2px solid var(--ink);border-radius:8px;margin:18px 0}
+.lesson-dialog .lesson-takeaway{background:#e6f8c7;border-left:4px solid #547b23;padding:12px;margin:18px 0}
+.lesson-takeaway b{display:block;font-size:12px;margin-bottom:4px}
+.lesson-continue{width:100%;white-space:normal;min-height:48px;margin:0 0 6px}
+@media(max-width:520px){.lesson-dialog{padding:22px 18px}.lesson-dialog h2{margin-bottom:16px}.lesson-block{margin:14px 0}.lesson-example{padding:12px}}
