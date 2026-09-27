@@ -13,6 +13,53 @@ function atReport(index){const s=session();for(let i=0;i<index;i++){
  s.state=command(s.state,{type:'submit_audit',reportId:['R1','R2'][i],recordId:['POS-17','POWER-18'][i],verdict:['contradicted','supported'][i]}).state;
 }return s;}
 
+test('R2 accepts ordinary agreement, matching readings, and common spelling mistakes on the first reply',async()=>{
+ for(const text of [
+  'R2 is right as the energy is right.',
+  'R2 is correct because the energy reading matches.',
+  'Accept because the report and record show the same amount.',
+  'The report and record both say 62.',
+  'The readings match.',
+  'R2 is corret as the engery is right.',
+  'Yes, the record says sixty-two units.',
+  'R2 is verified because the log shows 62 units.',
+  'R2是对的，能量对得上。',
+  '读数一致。',
+  '报告和记录都是62。',
+  '接受，因为剩余能量相符。'
+ ]){
+  const assessment=assessAudit('R2',text);
+  assert.equal(assessment.verdict,'supported',text);assert.equal(assessment.evidence,true,text);
+  const s=atReport(1),out=await liveReply(s,text,noProvider);
+  assert.equal(out.state.auditIndex,2,text);assert.equal(out.state.auditFindings.length,2,text);
+  assert.match(out.message,/R2 review saved/);
+  assert.equal(practiceReply(s.state,text).state.auditIndex,2,text);
+ }
+});
+
+test('R2 does not confuse agreement with mismatching, negated or unsupported evidence',async()=>{
+ const fake=async()=>response({content:'Correct!'});
+ for(const text of [
+  'R2 is correct because it is correct.',
+  'Accept because the energy readings do not match.',
+  'Accept because the readings do not agree.',
+  'Accept because the readings are not same.',
+  "Accept because the readings aren't the same.",
+  'I do not accept because both readings match.',
+  'Accept because the energy is not right.',
+  'Accept because the energy is 26.',
+  'Accept because the record says 26.',
+  'Accept because the energy is not 62.',
+  'The readings are different.',
+  'Are the readings the same?',
+  'R2是对的，因为读数不一致。',
+  'R2是对的，因为能量对不上。'
+ ]){
+  const out=await liveReply(atReport(1),text,fake);
+  assert.equal(out.state.auditIndex,1,text);assert.doesNotMatch(out.message,/saved|green/,text);
+ }
+});
+
 test('R1 accepts a named location mismatch, including the learner’s typo, without copied coordinates',async()=>{
  for(const text of [
   'r1 is not correct as the locaiton is not right',
