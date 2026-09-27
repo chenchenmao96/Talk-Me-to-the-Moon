@@ -10,6 +10,20 @@ test('HTTP session isolation, revision checks, valid mission flow and invalid re
   try{process.env.DEEPSEEK_API_KEY='test-placeholder';const live=await post('session',{missionId:'checkpoint'});assert.equal(live.body.mode,'live');delete process.env.DEEPSEEK_API_KEY;assert.equal((await post('session',{missionId:'checkpoint'})).status,503);}finally{if(key===undefined)delete process.env.DEEPSEEK_API_KEY;else process.env.DEEPSEEK_API_KEY=key;}
   const a=await post('session',{missionId:'reserve',mode:'practice'}),b=await post('session',{missionId:'verify',mode:'practice'});
   assert.equal(a.status,201);assert.notEqual(a.body.sessionId,b.body.sessionId);
+  for(const missionId of ['reserve','context','checkpoint','examples','verify','iterate']){
+   const intro=await post('session',{missionId,mode:'practice',language:'en'});
+   assert.doesNotMatch(intro.body.messages[0].content,/\p{Script=Han}/u);
+  }
+  const chinese=await post('session',{missionId:'iterate',mode:'practice',language:'zh'});
+  assert.match(chinese.body.messages[0].content,/样本/);
+  const english=await post('language',{sessionId:chinese.body.sessionId,revision:0,language:'en'});
+  assert.equal(english.status,200);assert.equal(english.body.language,'en');
+  assert.doesNotMatch(english.body.messages[0].content,/\p{Script=Han}/u);
+  assert.deepEqual(english.body.state,chinese.body.state);
+  const back=await post('language',{sessionId:chinese.body.sessionId,revision:0,language:'zh'});
+  assert.equal(back.body.messages[0].content,chinese.body.messages[0].content);
+  assert.deepEqual(back.body.state,chinese.body.state);
+  assert.equal((await post('language',{sessionId:chinese.body.sessionId,revision:0,language:'fr'})).status,400);
   const r=await post('chat',{sessionId:a.body.sessionId,revision:0,message:'Go to the base with at least 30 fuel remaining.'});assert.equal(r.status,200);assert.equal(r.body.state.plan.remaining,40);
   const stale=await post('action',{sessionId:a.body.sessionId,revision:0,action:'approve',planId:r.body.state.plan.id});assert.equal(stale.status,409);
   const finish=await post('action',{sessionId:a.body.sessionId,revision:r.body.state.revision,action:'approve',planId:r.body.state.plan.id});assert.equal(finish.body.state.status,'complete');assert.equal(finish.body.state.fuel,40);

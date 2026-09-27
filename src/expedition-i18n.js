@@ -1,4 +1,5 @@
 export const expeditionZh={
+'Could not switch languages. Your mission is unchanged. Please retry.':'切换语言失败，关卡进度保持不变，请重试。',
 'Our university expedition needs to land at Selene Base. Your private flight brief: the landing shield needs at least 30 fuel left on arrival, or the rocket breaks. BOLT has not seen this brief.':'大学科研队要降落月球基地。你的私人飞行简报：抵达时至少要剩 30 燃料，否则降落护盾失效，火箭会损毁。BOLT 没看过这份简报。',
 'The base is open. Move our research instrument across the canyon to the depot. Your private manifest is on screen; BOLT cannot see it.':'基地已启用，要把科研设备运过峡谷送到仓库。你的私人货单在画面上，BOLT 看不到。',
 'Our rover is ready to collect sample containers. Two routes lead to the sample field. Nobody has surveyed the ground since last night’s meteor shower.':'探测车准备收集样本容器。有两条路线通往采样地。昨晚流星雨之后，还没有人勘察过地面。',

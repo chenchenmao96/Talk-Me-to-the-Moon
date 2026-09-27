@@ -73,14 +73,14 @@ test('audit accepts conversational corrections without IDs but cannot borrow AI 
 test('live audit retains player reasoning for same report and clears it on progression',async()=>{
  let n=0;
  const fake=async()=>({ok:true,json:async()=>({choices:[{message:++n===1?{role:'assistant',tool_calls:[{id:'audit',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'submit_audit',reportId:'R1',recordId:'POS-17',verdict:'contradicted',sourceQuote:'巡视车位置与基地不同'})}}]}:{role:'assistant',content:'判断正确。'}}]})});
- const r=await liveReply({state:command(createState('verify'),{type:'verify'}).state,messages:[],auditContext:{index:0,text:'报道r1 不对'}},'巡视车位置与基地不同',fake);
+ const r=await liveReply({state:command(createState('verify'),{type:'verify'}).state,messages:[],language:'zh',auditContext:{index:0,text:'报道r1 不对'}},'巡视车位置与基地不同',fake);
  assert.equal(r.state.auditIndex,1);assert.equal(r.auditContext.text,'');assert.equal(r.auditContext.index,1);
 });
 
 test('setting cargo creates an actionable route even if the model only describes it',async()=>{
  let n=0;
  const fake=async()=>({ok:true,json:async()=>({choices:[{message:++n===1?{role:'assistant',tool_calls:[{id:'cargo',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'set_cargo',mass:4,sourceQuote:'这个设备4吨重，帮我运过去'})}}]}:{role:'assistant',content:'点按钮运送。'}}]})});
- const r=await liveReply({state:createState('context'),messages:[]},'这个设备4吨重，帮我运过去',fake);
+ const r=await liveReply({state:createState('context'),messages:[],language:'zh'},'这个设备4吨重，帮我运过去',fake);
  assert.equal(r.state.cargoMass,4);assert.equal(r.state.plan.routeId,'B');assert.equal(r.state.fuel,100);
 });
 

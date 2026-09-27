@@ -7,12 +7,13 @@ import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { createState, command, checks } from '../shared/engine.js';
 import { practiceReply } from './practice.js';
 import { liveReply } from './copilot.js';
+import {displayedMessages,localizedMessages} from './localization.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../dist');
 const sessions=new Map(), limits=new Map();
 const liveAvailable=()=>Boolean(process.env.DEEPSEEK_API_KEY);
 function safeEqual(a,b){const x=Buffer.from(String(a||'')),y=Buffer.from(String(b||''));return x.length===y.length&&timingSafeEqual(x,y);}
-function snapshot(s){return {sessionId:s.id,state:{...s.state,checks:checks(s.state)},messages:s.messages,mode:s.mode,demo:s.demo};}
+function snapshot(s){return {sessionId:s.id,state:{...s.state,checks:checks(s.state)},messages:displayedMessages(s),language:s.language,mode:s.mode,demo:s.demo};}
 function send(res,code,data){res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(Buffer.byteLength(text)>8192)throw new Error('Request too large');}return JSON.parse(text||'{}');}
 function allowed(key,max=35){const now=Date.now(),v=limits.get(key)||{start:now,n:0};if(now-v.start>60000){v.start=now;v.n=0;}v.n++;limits.set(key,v);return v.n<=max;}
@@ -24,7 +25,7 @@ export const server=http.createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://localhost');
   if(url.pathname.startsWith('/api/')){
-   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-5',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
+   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-6',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
    if(req.method!=='POST')return send(res,405,{error:'Use POST for mission requests.'});
    if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host&&!['localhost:5173','127.0.0.1:5173'].includes(new URL(req.headers.origin).host))return send(res,403,{error:'Origin not allowed.'});
    if(!allowed(req.socket.remoteAddress,60))return send(res,429,{error:'Please wait a moment before sending more commands.'});
@@ -44,18 +45,29 @@ export const server=http.createServer(async(req,res)=>{
      iterate:['Samples packed. I will fly us home on autopilot while you sleep. My current orders: take the fastest route. Want to test them or change them?','样本已装好。返程时你们休眠，由我自动驾驶。当前指令：走最快的路线。要先测试，还是修改指令？']
     };
     const intro=intros[state.missionId][input.language==='zh'?1:0];
-    const s={id,state,mode,demo:input.demo===true,language:input.language==='zh'?'zh':'en',messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
+    const s={id,state,mode,demo:input.demo===true,language:input.language==='zh'?'zh':'en',messages:[{role:'assistant',content:intro,translations:{en:intros[state.missionId][0],zh:intros[state.missionId][1]}}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
    }
    const s=sessions.get(input.sessionId);if(!s)return send(res,404,{error:'This session has expired. Start a new attempt.',expired:true});
-   if(input.language==='zh'||input.language==='en')s.language=input.language;
    s.touched=Date.now();if(s.busy)return send(res,409,{error:'The copilot is still handling the last instruction.'});
    if(input.revision!==s.state.revision)return send(res,409,{error:'The plan has changed. Please use the latest mission state.'});
    if(!allowed(s.id,20))return send(res,429,{error:'Take a breath. Try another command in a minute.'});
+   if(url.pathname==='/api/language'){
+    if(!['en','zh'].includes(input.language))return send(res,400,{error:'Unsupported language.'});
+    s.busy=true;
+    try{
+     const messages=await localizedMessages(s.messages,input.language);
+     s.messages=messages;s.language=input.language;
+     return send(res,200,snapshot(s));
+    }catch{return send(res,502,{error:'Could not switch languages. Your mission is unchanged. Please retry.'});}
+    finally{s.busy=false;}
+   }
+   if(input.language==='zh'||input.language==='en')s.language=input.language;
    if(url.pathname==='/api/action'){
     if(!['approve','cancel','set_examples','run_sort','run_trials','approve_release'].includes(input.action))return send(res,400,{error:'Unsupported commander action.'});
     const extra=input.action==='set_examples'?{exampleIds:Array.isArray(input.exampleIds)?input.exampleIds.slice(0,4).map(String):[]}:input.action==='run_trials'&&typeof input.scenarioId==='string'?{scenarioId:input.scenarioId}:{};
     const r=command(s.state,{type:input.action,planId:input.planId,...extra});s.state=r.state;
-    s.messages.push({role:'user',content:s.language==='zh'?({approve:'批准当前显示的方案。',reconcile:'根据位置记录修正任务报告。',cancel:'取消待执行方案。',run_sort:'运行提出的分拣规则。',run_trials:extra.scenarioId?'测试这一种发射情况。':'运行全部三项策略模拟。',approve_release:'发布当前返程指令。',set_examples:`把参考卡 ${(extra.exampleIds||[]).join('、')} 放上扫描托盘。`}[input.action]):({run_sort:'Run the proposed sorting rule.',run_trials:extra.scenarioId?`Test the ${extra.scenarioId} launch condition.`:'Run all three policy simulations.',approve_release:'Release the current standing orders.',set_examples:`Load reference cards ${(extra.exampleIds||[]).join(', ')} onto the scanner tray.`}[input.action])|| (input.action==='approve'?'Approve the displayed flight plan.':input.action==='reconcile'?'Correct the mission record using the position log.':'Cancel the pending plan.')},{role:'assistant',content:r.message});
+    const actionText={approve:'Approve the displayed flight plan.',cancel:'Cancel the pending plan.',run_sort:'Run the proposed sorting rule.',run_trials:extra.scenarioId?`Test the ${extra.scenarioId} launch condition.`:'Run all three policy simulations.',approve_release:'Release the current standing orders.',set_examples:`Load reference cards ${(extra.exampleIds||[]).join(', ')} onto the scanner tray.`}[input.action];
+    s.messages.push({role:'user',synthetic:true,localizable:false,content:actionText},{role:'assistant',localizable:false,content:r.message});
     return send(res,200,snapshot(s));
    }
    if(url.pathname==='/api/chat'){
@@ -64,7 +76,7 @@ export const server=http.createServer(async(req,res)=>{
     s.busy=true;
     try{
      const r=s.mode==='live'?await liveReply(s,input.message.trim()):practiceReply(s.state,input.message.trim());s.state=r.state;s.auditContext=r.auditContext;s.turns++;
-     s.messages.push({role:'user',content:input.message.trim()},{role:'assistant',content:r.message});return send(res,200,snapshot(s));
+     s.messages.push({role:'user',content:input.message.trim()},{role:'assistant',content:r.message,localizable:s.mode==='live',...(s.mode==='live'?{translations:{[s.language]:r.message}}:{})});return send(res,200,snapshot(s));
     }catch{return send(res,502,{error:'The live copilot could not respond. No actions from this turn were saved. Your draft is kept. Please retry.'});}
     finally{s.busy=false;}
    }
