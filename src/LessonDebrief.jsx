@@ -18,7 +18,7 @@ export function LessonDebrief({mission,state,lang,last,demo,onContinue,disabled}
    <h2 id="lesson-heading" ref={heading} tabIndex={-1}>{lesson.title}</h2>
    <section className="lesson-block"><h3>{zh?'这一关在教什么？':'WHAT WAS THIS TEACHING?'}</h3><p>{lesson.idea}</p></section>
    <section className="lesson-block"><h3>{zh?'刚才为什么能过关？':'WHY DID THAT WORK?'}</h3><p>{lesson.why}</p></section>
-   <section className="lesson-example"><h3>{zh?'生活中可以这样问 AI':'TRY IT OUTSIDE THE GAME'}</h3><p>{lesson.example}</p></section>
+   <section className="lesson-example"><h3>{zh?'试试这条完整提示词':'TRY THIS COMPLETE PROMPT'}</h3><p className="lesson-prompt">{lesson.example}</p><p className="example-check"><b>{zh?'你来核对：':'YOUR CHECK: '}</b>{lesson.check}</p></section>
    <p className="lesson-takeaway"><b>{zh?'带走这一招：':'TAKE THIS WITH YOU: '}</b>{lesson.takeaway}</p>
    <button type="button" className="primary lesson-continue" disabled={disabled} onClick={()=>{close();onContinue();}}>{last?(zh?(demo?'明白了，完成演示 ★':'明白了，领取徽章 ★'):(demo?'GOT IT · FINISH DEMO ★':'GOT IT · COLLECT BADGES ★')):(zh?'明白了，下一关 ➜':'GOT IT · NEXT MISSION ➜')}</button>
   </dialog>

@@ -25,7 +25,7 @@ export const server=http.createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://localhost');
   if(url.pathname.startsWith('/api/')){
-   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-13',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
+   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-14',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
    if(req.method!=='POST')return send(res,405,{error:'Use POST for mission requests.'});
    if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host&&!['localhost:5173','127.0.0.1:5173'].includes(new URL(req.headers.origin).host))return send(res,403,{error:'Origin not allowed.'});
    if(!allowed(req.socket.remoteAddress,60))return send(res,429,{error:'Please wait a moment before sending more commands.'});

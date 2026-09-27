@@ -10,3 +10,6 @@
 .lesson-takeaway b{display:block;font-size:12px;margin-bottom:4px}
 .lesson-continue{width:100%;white-space:normal;min-height:48px;margin:0 0 6px}
 @media(max-width:520px){.lesson-dialog{padding:22px 18px}.lesson-dialog h2{margin-bottom:16px}.lesson-block{margin:14px 0}.lesson-example{padding:12px}}
+
+.lesson-dialog .lesson-prompt{white-space:pre-line}
+.lesson-dialog .example-check{border-top:1px solid #b5b7cf;margin-top:12px;padding-top:12px;font-size:14px}
