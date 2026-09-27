@@ -23,10 +23,16 @@ Open http://127.0.0.1:4173. This app needs its Node server; deploying `dist/` al
 ## Play
 
 - **Fuel fail:** Keep at least 30 fuel for the fictional landing shield. The fast route leaves20: approving it breaks the rocket on touchdown, with an explosion and a one-click rebuild. The eco route leaves40 and wins. The warning comes before launch; there is no forced failure or secret phrase.
-- **Crater trouble:** A plain travel request proposes the fastest provisional route without scanning. Both sites remain unknown. Ask to inspect safety in your own words, then review the checked route. The North route has persistent asteroid obstacles visible as soon as mission2 opens; the South route is clear. The rocks remain visible during planning, flight and retry. An uninspected North launch collides and explodes before reaching the base; an uninspected South landing is lucky but does not earn the inspection badge. Scanning invalidates earlier approvals.
+- **Crater trouble:** A plain travel request proposes the fastest provisional route without scanning. The inspection is still pending. Ask to inspect safety in your own words, then review the checked route. The North route has persistent asteroid obstacles visible as soon as mission2 opens; the South route is clear. The rocks remain visible during planning, flight and retry. An uninspected North launch collides and explodes before reaching the base; an uninspected South landing is lucky but does not earn the inspection badge. Scanning invalidates earlier approvals.
 - **Fake finish:** An explicitly scripted faulty arrival report contradicts the position log. Check and correct it. The rocket stays at Ridge Station; verification is not portrayed as a landing.
 
-The home screen explains the three controls. Missions unlock in order. Completed badges persist in this browser; they are not evidence of learning mastery. The end screen names the actual three skills exercised. The game uses original SVG robot/rocket art inspired by chunky block-game aesthetics, not Roblox assets or a Roblox integration.
+- **Heavy cargo:** The commander sees a private 4-tonne manifest. Share the mass so BOLT can choose a 6-tonne freight bridge instead of overloading the 3-tonne short bridge. Choosing a sufficient bridge directly is also accepted; outcomes are not keyword-scored.
+- **Alien specimens:** Supply labeled examples or an explicit sorting rule. The engine tests four specimens across shape/color combinations. A color-only rule fails; revise and retest. Examples are a useful way to communicate a rule, not a mandatory password.
+- **Final flight test:** Run one policy against clear skies, obstacles and low battery. Fix failed cases while retaining earlier requirements. Release requires three passing results for the current policy, including a correct hold when no route can preserve 30 fuel. Revising or cancelling invalidates earlier release eligibility.
+
+The home screen offers Continue Journey when saved badges leave unfinished missions. Earlier three-level progress is preserved; returning players can continue directly to mission 4.
+
+The home screen explains the three controls. Missions unlock in order. Completed badges persist in this browser; they are not evidence of learning mastery. The end screen names the six skills exercised. The game uses original SVG robot/rocket art inspired by chunky block-game aesthetics, not Roblox assets or a Roblox integration.
 
 Research has been removed from the player interface. The evidence and limitations remain in [the design rationale](docs/research.md).
 
@@ -45,7 +51,18 @@ npm test
 npm run build
 ```
 
-The unit/API suite checks constraints, stale approvals, isolation, destruction, evidence gating, and atomic provider failures. Synthetic browser walkthroughs exercise home → all three missions → badges, including deliberate failure and recovery. These are not real participants or a learning-effectiveness study.
+The 20-test unit/API suite also covers cargo overloads/private context, specimen generalization, policy revision, and stale release protection. Current six-mission UI checks run in both Chinese mobile and English desktop; real DeepSeek checks cover all three new mechanics. Synthetic browser walkthroughs exercise home → all six missions → badges, including deliberate failure and recovery. These are not real participants or a learning-effectiveness study.
+
+Current full-version checks:
+
+```sh
+node scripts/check-six-browser.cjs
+node scripts/check-six-live.mjs
+```
+
+The browser command needs Playwright and Google Chrome (or `PLAYWRIGHT_PATH`); it explicitly selects the developer practice API to test deterministic UI flows. The live command makes real DeepSeek calls and consumes API credit. It checks cargo mass sharing, incorrect-color→correct-shape sorting, and policy progress 1/3→2/3→3/3 without premature release.
+
+The preserved 100-persona report is historical evidence for the earlier three-mission build, not a claim that 100 people tested this six-mission update. The harness now supports six missions if rerun.
 
 To reproduce the 100-persona walkthrough (requires Playwright and installed Google Chrome):
 
@@ -83,6 +100,6 @@ The 100-persona report describes the earlier revision and practice-mode coverage
 
 ## 中文 / English
 
-The header language toggle translates the home screen, all three missions, map labels, controls, outcomes, logs, and connection feedback. Switching preserves the current mission and plan. The preference is stored locally and reflected in `?lang=zh` / `?lang=en`. New DeepSeek replies follow the selected Chinese locale; earlier free-form model messages remain in the language they were originally generated in. Player-authored messages are never translated silently.
+The header language toggle translates the home screen, all six missions, map labels, controls, outcomes, logs, and connection feedback. Switching preserves the current mission and plan. The preference is stored locally and reflected in `?lang=zh` / `?lang=en`. New DeepSeek replies follow the selected Chinese locale; earlier free-form model messages remain in the language they were originally generated in. Player-authored messages are never translated silently.
 
 This revision was verified with a complete Chinese mobile walkthrough (including unknown-route crash and lucky-but-uninspected landing), a mid-mission language switch, and real DeepSeek English travel / Chinese safety requests within the Chinese interface.

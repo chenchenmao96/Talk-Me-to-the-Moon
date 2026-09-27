@@ -35,7 +35,8 @@ export const server=http.createServer(async(req,res)=>{
     if(mode==='live'&&!liveAvailable())return send(res,503,{error:'BOLT is not connected. Configure the server’s DeepSeek key and retry.'});
     if(mode==='live'&&process.env.LIVE_ACCESS_CODE&&!safeEqual(input.accessCode,process.env.LIVE_ACCESS_CODE))return send(res,403,{error:'The live access code is not correct.'});
     const id=randomUUID(),state=createState(input.missionId||'reserve');
-    const intro=state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'BOLT here! Two landing spots. One looks suspicious. Ask me to scan before we pick a route.':'Hey, I’m BOLT. Where are we going? Any limits? I pick the fastest route unless you tell me otherwise. You get the launch button.';
+    const newIntros={context:'Cargo delivery! I know the bridge capacities, but your cargo manifest is private. What do I need to know?',examples:'Specimen sorter online. Show me labeled examples or tell me a rule, then we can test it.',iterate:'Flight test bench ready. The current policy picks the fastest route. Test it in all three situations, or give me a policy to try.'};
+    const intro=newIntros[state.missionId]|| (state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'BOLT here! Two landing spots. One looks suspicious. Ask me to scan before we pick a route.':'Hey, I’m BOLT. Where are we going? Any limits? I pick the fastest route unless you tell me otherwise. You get the launch button.');
     const s={id,state,mode,language:input.language==='zh'?'zh':'en',messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
    }
    const s=sessions.get(input.sessionId);if(!s)return send(res,404,{error:'This session has expired. Start a new attempt.',expired:true});
@@ -44,9 +45,9 @@ export const server=http.createServer(async(req,res)=>{
    if(input.revision!==s.state.revision)return send(res,409,{error:'The plan has changed. Please use the latest mission state.'});
    if(!allowed(s.id,20))return send(res,429,{error:'Take a breath. Try another command in a minute.'});
    if(url.pathname==='/api/action'){
-    if(!['approve','reconcile','cancel'].includes(input.action))return send(res,400,{error:'Unsupported commander action.'});
+    if(!['approve','reconcile','cancel','run_sort','run_trials','approve_release'].includes(input.action))return send(res,400,{error:'Unsupported commander action.'});
     const r=command(s.state,{type:input.action,planId:input.planId});s.state=r.state;
-    s.messages.push({role:'user',content:input.action==='approve'?'Approve the displayed flight plan.':input.action==='reconcile'?'Correct the mission record using the position log.':'Cancel the pending plan.'},{role:'assistant',content:r.message});
+    s.messages.push({role:'user',content:s.language==='zh'?({approve:'批准当前显示的方案。',reconcile:'根据位置记录修正任务报告。',cancel:'取消待执行方案。',run_sort:'运行提出的分拣规则。',run_trials:'运行全部三项策略模拟。',approve_release:'发布通过测试的策略。'}[input.action]):({run_sort:'Run the proposed sorting rule.',run_trials:'Run all three policy simulations.',approve_release:'Release the tested policy.'}[input.action])|| (input.action==='approve'?'Approve the displayed flight plan.':input.action==='reconcile'?'Correct the mission record using the position log.':'Cancel the pending plan.')},{role:'assistant',content:r.message});
     return send(res,200,snapshot(s));
    }
    if(url.pathname==='/api/chat'){

@@ -1,0 +1,9 @@
+import '../server/env.js';
+import assert from 'node:assert/strict';
+import {createState} from '../shared/engine.js';
+import {liveReply} from '../server/copilot.js';
+async function talk(session,text){const r=await liveReply(session,text);session.state=r.state;session.messages.push({role:'user',content:text},{role:'assistant',content:r.message});assert.match(r.message,/[\u4e00-\u9fff]/);return r;}
+const session=id=>({state:createState(id),messages:[],language:'zh'});
+const cargo=session('context');await talk(cargo,'货箱重4吨，请规划一条能承重的过桥路线，先不要执行。');assert.equal(cargo.state.cargoMass,4);assert.equal(cargo.state.plan.routeId,'B');assert.equal(cargo.state.fuel,100);console.log('Live cargo: supplied mass leads to freight bridge, no premature delivery.');
+const sort=session('examples');await talk(sort,'按颜色分拣，保留蓝色，剔除橙色。测试一下。');assert.equal(sort.state.sortResults.filter(x=>x.pass).length,2);assert.equal(sort.state.status,'active');await talk(sort,'修改规则。参考例子：蓝色圆形保留，橙色圆形也保留，蓝色尖刺形剔除。根据这些例子总结规律，再测试四个标本。');assert.equal(sort.state.sortRule.feature,'shape');assert.equal(sort.state.sortRule.keepValue,'round');assert.equal(sort.state.status,'complete');console.log('Live examples: wrong color rule fails; supplied examples yield a general shape rule and pass.');
+const policy=session('iterate');await talk(policy,'先测试当前策略的全部三种情况，不要修改策略。');assert.equal(policy.state.trialResults.filter(x=>x.pass).length,1);await talk(policy,'增加避开障碍的要求，再测试全部三种情况。');assert.equal(policy.state.policy.avoidObstacles,true);assert.equal(policy.state.trialResults.filter(x=>x.pass).length,2);await talk(policy,'还要至少保留30燃料，没有路线能满足时原地等待。保留之前的避障要求，再测试全部三种情况。');assert.deepEqual(policy.state.policy,{avoidObstacles:true,minReserve:30,holdIfNeeded:true});assert.ok(policy.state.trialResults.every(x=>x.pass));assert.equal(policy.state.status,'active');assert.equal(policy.state.released,false);console.log('Live revisions: 1/3 → 2/3 → 3/3, earlier constraint preserved, release still awaits player.');

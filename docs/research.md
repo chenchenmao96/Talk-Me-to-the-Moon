@@ -1,19 +1,19 @@
 # Research and design rationale
 
-The curriculum is research-informed; the learning effectiveness of this implementation has not been evaluated. Six skills inform the design; three missions are implemented. Completing a mission is evidence of that game outcome, not a validated learning assessment.
+The curriculum is research-informed; the learning effectiveness of this implementation has not been evaluated. Six skills inform the design; six missions are implemented. Completing a mission is evidence of that game outcome, not a validated learning assessment.
 
 | Skill | Evidence | Application and boundary |
 |---|---|---|
 | Explicit goals and constraints | Bsharat et al., Principle 25; Tankelevitch et al., goal formulation | Mission 01 uses a fictional landing-shield fuel reserve. The source models and benchmark do not establish universal effectiveness. |
-| Relevant additional information | The Prompt Report, prompt components | Planned private-report mission. Taxonomic support, not a learning-effectiveness experiment. The metacognitive paper is not used as direct evidence for missing-information sharing. |
-| Examples | Brown et al.; Bsharat et al., Principle 7; Zamfirescu-Pereira et al. | Planned sample classification. Correct rules would also be accepted; practice with examples and actual use of examples should be measured separately. |
+| Relevant additional information | The Prompt Report, prompt components | Mission 04 uses a private cargo manifest. Taxonomic support, not a learning-effectiveness experiment. The metacognitive paper is not used as direct evidence for missing-information sharing. |
+| Examples | Brown et al.; Bsharat et al., Principle 7; Zamfirescu-Pereira et al. | Mission 05 uses labeled specimen examples and tests new combinations. Correct rules would also be accepted; practice with examples and actual use of examples should be measured separately. |
 | Inspectable steps | Wu et al., AI Chains, 20-person study | Mission 02 adds explicit plan approval. This authorization mechanism is a design extension. |
 | External evidence | Huang et al.; metacognitive output evaluation | Mission 03 compares a scripted report and telemetry. Applying reasoning self-correction findings to agent completion reports is an analogy, not direct evidence. |
-| Revise and test | Zamfirescu-Pereira et al., 10-person study; metacognitive flexibility | Planned transfer chapter. Replay is available now, but no independent transfer study has been conducted. |
+| Revise and test | Zamfirescu-Pereira et al., 10-person study; metacognitive flexibility | Mission 06 tests a policy across three situations and invalidates results after revision. No independent learning-transfer study has been conducted. |
 
 ## Incorporated review feedback
 
-- Three complete missions rather than six partially implemented chapters.
+- The initial three-mission MVP has been expanded to six playable missions, each with deterministic outcomes and bilingual UI.
 - The revised game uses a fictional 30-fuel landing-shield threshold; failure destroys the rocket at touchdown. This consequence is a game-design decision, not a research finding.
 - Research is retained here for reviewers, but removed from the player-facing interface.
 - Deterministic state checks rather than an LLM assigning a prompt score.

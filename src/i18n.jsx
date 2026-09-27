@@ -1,5 +1,6 @@
 import React from 'react';
-const zh={
+import {advancedZh} from './advanced-i18n.js';
+const zh={...advancedZh,
 'A · BLOCKED':'A · 有障碍','Route A blocked by asteroid rocks':'A 路线被陨石障碍挡住','North obstacle field':'北侧障碍区',
 'TALK ME':'说走就走','TO THE MOON':'奔向月球','Switch language':'切换语言','BOLT SETTINGS':'BOLT 设置','BADGES':'枚徽章','/3 BADGES':'/3 枚徽章',
 'ONE BOT. ONE ROCKET. YOUR BAD IDEAS.':'一个机器人，一枚火箭，听你指挥。','BIG MOON.':'月球很大。','TINY ROBOT.':'机器人很小。','YOU’RE IN CHARGE.':'这次，你说了算。','BOLT takes instructions a little too literally.':'BOLT 有时候太按字面理解指令。','Help this blockhead reach the Moon in one piece.':'带这个方脑袋平安抵达月球吧。','BOOTING…':'启动中…','LET’S PLAY':'开始游戏','3 short missions · One AI copilot · No account':'三个小任务 · 一个 AI 搭档 · 无需注册','Tell BOLT':'告诉 BOLT','Check the plan':'检查方案','Hit launch':'按下发射','I have a rocket license.':'我有火箭驾驶证。','…probably.':'……大概有吧。','BOLT / YOUR QUESTIONABLE COPILOT':'BOLT / 你不太靠谱的副驾驶',
@@ -24,6 +25,18 @@ export function tr(text,lang){
  if(text.includes('\n\n'))return text.split('\n\n').map(part=>tr(part,lang)).join('\n\n');
  const trimmed=text.trim();if(zh[trimmed])return text.replace(trimmed,zh[trimmed]);
  const rules=[
+ [/^Policy drafted: avoid obstacles (YES|NO); reserve (\d+); hold if no route (YES|NO)\. Run all three simulations before release\.$/,(_,avoid,n,hold)=>`策略已提出：避障${avoid==='YES'?'开启':'关闭'}，保留 ${n} 燃料，无可行路线时${hold==='YES'?'等待':'未设置等待'}。发布前请测试全部三种情况。`],
+
+ [/^Cargo mass shared: ([\d.]+) tonnes\.$/,(_,n)=>`已告知货重：${n} 吨。`],
+ [/^Cargo mass recorded: ([\d.]+) tonnes\. Earlier plans withdrawn\. Please request a route\.$/,(_,n)=>`货重已记录为 ${n} 吨，旧方案已撤回。现在可以请求过桥路线。`],
+ [/^Cargo route proposed: (.+), capacity ([\d.]+) tonnes\.$/,(_,route,n)=>`货运方案：${tr(route,lang)}，承重 ${n} 吨。`],
+ [/^Proposed (.+): capacity ([\d.]+) tonnes, (\d+) fuel\. (.*)$/,(_,route,n,fuel,extra)=>`${tr(route,lang)}：承重 ${n} 吨，消耗 ${fuel} 燃料。${extra.startsWith('Cargo mass has')?'尚未告知货重，请先核对私人货单，再批准。':'请核对货单并批准运送。'}`],
+ [/^Sorter rule: keep (.+) by (.+)\.$/,(_,value,feature)=>`分拣规则：按${tr(feature,lang)}判断，保留${tr(value,lang)}。`],
+ [/^Rule ready: keep (.+) specimens; reject the others\. Run a test batch to check it\.$/,(_,value)=>`规则已就绪：保留${tr(value,lang)}标本，剔除其他标本。运行测试批次来验证。`],
+ [/^Sorting test: (\d+)\/4 correct\.$/,(_,n)=>`分拣测试：${n}/4 正确。`],
+ [/^Sorting test failed: (\d+)\/4 correct\. Check the examples, revise the rule, and test again\.$/,(_,n)=>`分拣测试未通过：${n}/4 正确。检查示例，修改规则，再测试一次。`],
+ [/^Policy trials: (\d+)\/3 passed\.(.*)$/,(_,n,extra)=>`策略测试：${n}/3 通过。${extra?(n==='3'?'全部通过，可以批准发布。':'查看三种情况的结果，修正失败后重新测试全部情况。'):''}`],
+
  [/^Commander approved (.+)\. Hit the North obstacle field before reaching the base with (\d+) fuel units\. Rocket destroyed\.$/,(_,route,n)=>`已批准${tr(route,lang)}。抵达基地前撞上北侧障碍物，火箭损毁，剩余 ${n} 燃料。`],
  [/^(.+): (\d+) fuel used, (\d+) left\. (.+) Still parked!$/,(_,route,cost,left,rest)=>`${tr(route,lang)}：消耗 ${cost}，剩余 ${left} 燃料。${rest.startsWith('Ground')?'地面安全未知。请先检查再选路线，未经检查就发射存在风险。':'检查路线卡，然后按发射。'}飞船还未移动。`],
  [/^You asked to keep (\d+)\. The best available route leaves (\d+)\. No fuel spent\. Try a reachable limit\.$/,(_,want,max)=>`你要求保留 ${want} 燃料，但现有路线最多可留下 ${max}。未消耗燃料，请调整限制。`],

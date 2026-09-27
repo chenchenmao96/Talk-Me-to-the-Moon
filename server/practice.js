@@ -3,6 +3,22 @@ import { command } from '../shared/engine.js';
 export function practiceReply(state,text){
  const q=text.toLowerCase(); let s=state, replies=[];
  const run=a=>{const r=command(s,a);s=r.state;replies.push(r.message);};
+ if(['context','examples','iterate'].includes(s.missionId)){
+  if(/cancel|取消/.test(q)){run({type:'cancel'});return {state:s,message:replies.join('\n\n')};}
+  if(s.missionId==='context'){
+   const mass=q.match(/(\d+(?:\.\d+)?)\s*(?:tonnes?|tons?|吨)/);if(mass)run({type:'set_cargo',mass:Number(mass[1])});
+   if(/plan|route|deliver|bridge|go|送|路线|桥|规划/.test(q))run({type:'plan',routeId:/route b|freight|货运桥/i.test(q)?'B':/route a|short bridge/i.test(q)?'A':undefined});
+  }else if(s.missionId==='examples'){
+   if(/color|颜色/.test(q))run({type:'set_sort_rule',feature:'color',keepValue:/orange|橙/.test(q)?'orange':'blue'});
+   else if(/round|圆|spiky|尖/.test(q))run({type:'set_sort_rule',feature:'shape',keepValue:/keep spiky|保留尖/.test(q)?'spiky':'round'});
+   if(/test|run|测试|运行/.test(q))run({type:'run_sort'});
+  }else{
+   const amount=q.match(/(?:keep|reserve|保留|至少)\s*(\d+)/);const avoid=/avoid|避开|绕开/.test(q),hold=/hold|wait|等待|停留/.test(q);
+   if(amount||avoid||hold)run({type:'set_policy',...(amount?{amount:Number(amount[1])}:{}),...(avoid?{avoidObstacles:true}:{}),...(hold?{holdIfNeeded:true}:{})});
+   if(/test|run|测试|运行/.test(q))run({type:'run_trials'});
+  }
+  if(!replies.length)run({type:'inspect'});return {state:s,message:replies.join('\n\n')};
+ }
  const reserve=q.match(/(?:at least|minimum(?: of)?|reserve(?: of)?|keep|leave|retain|save|保留|至少|剩余)\s*(\d{1,3})/i)||q.match(/(\d{1,3})\s*(?:units? of )?(?:fuel|燃料)\s*(?:left|remaining|in reserve)/i);
  if(reserve)run({type:'set_reserve',amount:Number(reserve[1])});
  if(/cancel|stop|取消|停止/.test(q)&&!/before|until/.test(q)){run({type:'cancel'});return {state:s,message:replies.join('\n\n')};}

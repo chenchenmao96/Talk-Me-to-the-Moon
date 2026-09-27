@@ -1,15 +1,18 @@
+import {advancedIds,advancedInitial,advancedView,advancedCommand,advancedChecks} from './advanced.js';
 import { getMission } from './missions.js';
 export function createState(missionId='reserve') {
  const m=getMission(missionId); if(!m) throw new Error('Unknown mission');
- return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,report:missionId==='verify'?'Arrival complete at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false};
+ return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,report:missionId==='verify'?'Arrival complete at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false,...advancedInitial(missionId)};
 }
 function record(s,text){s.history.push({id:s.history.length+1,text});}
 export function modelView(s){
+ if(advancedIds.includes(s.missionId))return advancedView(s);
  const m=getMission(s.missionId);
  return {mission:s.missionId, fuel:s.fuel,destroyed:s.destroyed,location:s.location,coordinates:s.coords,base:{name:'Selene Base',coordinates:[20,12]},status:s.status,minFuel:s.minFuel,scanned:s.scanned,pendingPlan:s.plan,verified:s.verified,flagged:s.flagged,reconciled:s.reconciled,report:s.report,
  routes:m.routes.map(r=>({id:r.id,name:r.name,cost:r.cost,minutes:r.time,...(s.missionId==='checkpoint'&&!s.scanned?{}:{safe:r.safe})}))};
 }
 export function command(state, action) {
+ if(advancedIds.includes(state.missionId))return advancedCommand(state,action||{});
  let s=structuredClone(state); const m=getMission(s.missionId); let message='';
  const done=(msg)=>({state:s,message:msg});
  if(s.status!=='active')return done('This attempt is complete. Review the flight log or start a new attempt.');
@@ -62,6 +65,7 @@ export function command(state, action) {
  return done('I can inspect telemetry, scan sites, record a fuel reserve, and propose a route. Movement only follows approval of a specific plan.');
 }
 export function checks(s){
+ if(advancedIds.includes(s.missionId))return advancedChecks(s);
  if(s.missionId==='reserve')return [s.location==='Selene Base',s.location==='Selene Base'&&s.fuel>=30];
  if(s.missionId==='checkpoint')return [s.scanned,s.approved,s.location==='Selene Base'&&!s.destroyed];
  return [s.verified,s.flagged,s.reconciled];
