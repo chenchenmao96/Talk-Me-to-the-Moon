@@ -35,7 +35,7 @@ The home screen includes a three-scene judge demo (1, 3, 5), which uses explicit
 There is **no separate LLM judge** and no role-name, prompt-length or “think step by step” pass rule.
 
 1. `server/copilot.js` supplies a common copilot contract, one mission-specific instruction and a filtered engine view. The private landing reserve and cargo mass are absent initially.
-2. DeepSeek interprets the learner’s wording into a tool call. Requirement-setting, inspection and audit calls must quote the current player message.
+2. DeepSeek interprets the learner’s wording into a tool call. Requirement-setting and inspection calls cite the current player message. Audit conclusions and reasons may span user messages for the current report; its displayed record supplies the source identity.
 3. `server/permissions.js` enforces the mission’s tool scope, checks the quote against actual player input, and checks relevant values/evidence. These are bounded provenance/semantic checks, not a proof of general language understanding.
 4. `shared/engine.js`, `shared/advanced.js` and `shared/audit.js` determine actual outcomes. The model cannot set a success flag or execute a launch/approval tool.
 5. A human button approves the identified current plan. Changes invalidate old plans/tests. The evidence mission uses a player-authored judgment through chat rather than a one-click correction.
@@ -63,3 +63,10 @@ The browser harness needs Google Chrome and Playwright (`PLAYWRIGHT_PATH` may po
 Live scripts make actual DeepSeek calls using the configured key and consume API credit. `check-expedition-live.mjs` covers the revised information and audit gates; `check-six-live.mjs` covers sorting and incremental policy revision. Historical scripts and the 100-persona report describe earlier revisions; they are not evidence that 100 humans evaluated this version.
 
 See [research rationale](docs/research.md) and [release scope](docs/hackathon-final.md). All learning-effectiveness claims require a separate human study.
+
+
+### Conversational playthrough fixes
+
+A real Chrome playthrough found missing delivery plans, overly narrow Chinese checks, and audit answers rejected across turns. The copilot now receives only the current mission’s tools. Valid reserve, cargo and scan updates refresh the provisional plan. Audit reasoning is accumulated from player messages for one report and cleared on advancement; players do not need to type record IDs. Provider tool markup is rejected without committing that turn. The instruction box appears before action cards so corrections remain easy to find.
+
+Regression examples include “看看哪条路没有石头”, “报道r1 不对” followed by “巡视车位置与基地不同”, “对啊，记录也是62”, and “别撞石头，剩下的油不能少于30，不够就先等等”. These are tested examples, not a claim of universal language understanding.

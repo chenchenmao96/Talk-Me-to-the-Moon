@@ -10,7 +10,7 @@ A three-stage judge demo is reachable from the homepage; its badge state is sepa
 
 - Reserve and cargo shortcuts are blocked by code even if the chosen route is physically safe.
 - Mission-specific copilot instructions replace the monolithic curriculum prompt.
-- Tool calls changing requirements or submitting judgments cite actual player text; server checks validate source quotes, relevant values and mission scope.
+- Tool calls changing requirements or submitting judgments cite actual player text; server checks validate source quotes, relevant values and mission scope. Audit reasoning can span multiple player turns within the same report; source IDs need not be retyped.
 - Mission 5 separates evidence retrieval from judgment. Correct, incorrect and unsupported claims require different decisions, conveyed through the chat with evidence.
 - Templates leave meaningful fields for the player. No role phrase, sentence count or “step by step” password is scored.
 - Policy tests still execute the current policy without silently improving it, preserve earlier fields on revision, and invalidate old release eligibility.
@@ -21,4 +21,4 @@ The live LLM interprets meaning; it can err. Bounded input checks and determinis
 
 ## Release checks
 
-Run the current unit/API suite, production build, bilingual browser harness and bounded live-provider tests listed in the README. Review the generated screenshots. Confirm the deployed health endpoint reports `expedition-2` before presenting the new URL as released.
+Run the current unit/API suite, production build, bilingual browser harness and bounded live-provider tests listed in the README. Review the generated screenshots. Confirm the deployed health endpoint reports `expedition-3` before presenting the new URL as released.

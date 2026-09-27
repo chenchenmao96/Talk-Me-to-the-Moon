@@ -9,7 +9,7 @@ export function AuditWorld({state,lang}){
   <div className="audit-stamps">{reports.map((x,i)=><span className={state?.auditFindings?.[i]?'stamped':''} key={x.id}>{state?.auditFindings?.[i]?'✓':i+1} {zh?'报告':'REPORT'} {x.id}</span>)}</div>
   {r?<><article className="report-sheet"><small>{zh?'待核查的预设报告':'SCRIPTED REPORT TO CHECK'}</small><h2>{zh?r.zh:r.claim}</h2><span className="paper-bot">▣</span></article>
    <div className="evidence-strip"><b>{zh?'独立记录':'INDEPENDENT RECORD'}</b><p>{state?.verified?(zh?r.evidenceZh:r.evidence):(zh?'让 BOLT 查询当前报告的记录。':'Ask BOLT to retrieve the record for this report.')}</p></div>
-   <p className="audit-instruction">{zh?'读记录 → 比较事实 → 告诉 BOLT 你的判断':'Read → compare → tell BOLT your judgment'}</p></>:
+   <p className="audit-instruction">{zh?'这句话对不对？说说为什么。无需抄写记录编号。':'Is the claim right? Explain why. No record ID needed.'}</p></>:
    <article className="report-sheet audit-complete"><span>✓</span><h2>{zh?'科研报告已核查':'RESEARCH REPORT REVIEWED'}</h2><p>{zh?'纠正位置 · 确认能量 · 等待成分分析':'Location corrected · Energy confirmed · Analysis pending'}</p></article>}
  </div>;
 }
