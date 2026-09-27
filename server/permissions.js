@@ -1,6 +1,6 @@
 // The model interprets meaning; code enforces scope and checks cited player text.
 // This is provenance validation, not a general-purpose natural-language proof system.
-export const actions={reserve:['inspect','cancel','plan','set_reserve'],context:['inspect','cancel','plan','set_cargo'],checkpoint:['inspect','cancel','plan','scan'],examples:['inspect','cancel','set_sort_rule','run_sort'],verify:['inspect','verify','submit_audit'],iterate:['inspect','cancel','set_policy','run_trials']};
+export const actions={reserve:['inspect','cancel','plan','set_reserve'],context:['inspect','cancel','plan','set_cargo'],checkpoint:['inspect','cancel','plan','scan'],examples:['inspect','cancel','set_examples','set_sort_rule','run_sort'],verify:['inspect','verify','submit_audit'],iterate:['inspect','cancel','set_policy','run_trials']};
 const numeric=(quote,n)=>new RegExp(`(?:^|[^\\d.])${String(n).replace('.','\\.')}(?:$|[^\\d.])`).test(quote)||({30:'三十',4:'四',62:'六十二'}[n]&&quote.includes({30:'三十',4:'四',62:'六十二'}[n]));
 export function authorizeTool(state,a,text,auditText=text){
  if(!actions[state.missionId]?.includes(a.type))return 'This tool is unavailable in the current mission.';
@@ -13,6 +13,10 @@ export function authorizeTool(state,a,text,auditText=text){
  if(a.type==='set_sort_rule'){
   const mentions={round:/(round|circle|circular|圆)/i,spiky:/(spik|尖)/i,blue:/(blue|蓝)/i,orange:/(orange|橙)/i};
   if(!mentions[a.keepValue]?.test(quote))return 'Ask the player for examples or a rule; do not choose the hidden standard yourself.';
+ }
+ if(a.type==='set_examples'){
+  const card={C1:[/(blue|蓝)/i,/(round|circle|circular|圆)/i],C2:[/(orange|橙)/i,/(spik|尖)/i],C3:[/(orange|橙)/i,/(round|circle|circular|圆)/i],C4:[/(blue|蓝)/i,/(spik|尖)/i]};
+  if(!Array.isArray(a.exampleIds)||!a.exampleIds.length||a.exampleIds.some(id=>!card[id]||!card[id].every(r=>r.test(quote))))return 'Ask the player which reference cards to show; do not pick examples yourself.';
  }
  if(a.type==='set_policy'){
   if(a.amount!==undefined&&!numeric(quote,a.amount))return 'The reserve value must appear in the player instruction.';

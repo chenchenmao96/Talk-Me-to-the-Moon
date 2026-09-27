@@ -1,4 +1,10 @@
 export const expeditionZh={
+'Our university expedition needs to land at Selene Base. Your private flight brief: the landing shield needs at least 30 fuel left on arrival, or the rocket breaks. BOLT has not seen this brief.':'大学科研队要降落月球基地。你的私人飞行简报：抵达时至少要剩 30 燃料，否则降落护盾失效，火箭会损毁。BOLT 没看过这份简报。',
+'The base is open. Move our research instrument across the canyon to the depot. Your private manifest is on screen; BOLT cannot see it.':'基地已启用，要把科研设备运过峡谷送到仓库。你的私人货单在画面上，BOLT 看不到。',
+'Our rover is ready to collect sample containers. Two routes lead to the sample field. Nobody has surveyed the ground since last night’s meteor shower.':'探测车准备收集样本容器。有两条路线通往采样地。昨晚流星雨之后，还没有人勘察过地面。',
+'The fastest route is not always the safest. Ask BOLT to inspect the routes before you approve a plan.':'最快的路线不一定最安全。批准方案前，先让 BOLT 检查路线。',
+'P1–P4 are back in the lab. Your reference cards show how this lab handles containers. BOLT’s scanner tray fits only two cards. Choose which examples to show it, then test the sorter.':'P1–P4 已回到实验室。你的参考卡展示了实验室的处理方式。BOLT 的扫描托盘只能放两张卡。选出要给它看的示例，再测试分拣机。',
+'The samples and report are packed. BOLT will fly home on autopilot while the crew sleeps; nobody can correct it mid-flight. Launch day could bring any of the three conditions below, and the capsule needs at least 30 fuel on arrival. Write BOLT’s standing orders, test them, then release.':'样本和报告已装好。返程时全员休眠，由 BOLT 自动驾驶，途中没人能纠正它。发射当天可能遇到下面三种情况中的任何一种，返回舱抵达时至少要剩 30 燃料。写好 BOLT 的返程指令，测试后再发布。',
 'Compare this route with your private shield requirement.':'请把这条路线的剩余燃料与你的护盾要求对照。','CHECK YOUR MANIFEST':'由你对照货单确认',
 'The shield held! You connected your mission requirement with BOLT’s route data. Share constraints with AI, or ask for the facts you need to make your own decision.':'护盾撑住了！你结合任务要求与 BOLT 的路线数据作出了决定。你可以告诉 AI 限制，也可以先询问数据、再自己判断。',
 'The cargo arrived intact. You combined the cargo manifest with BOLT’s bridge data. Sharing your context and asking for missing facts are both useful ways to work with AI.':'设备完整送达！你结合了货单和 BOLT 的桥梁数据。告诉 AI 你的情况，或向它询问缺少的信息，都是有效的合作方式。',

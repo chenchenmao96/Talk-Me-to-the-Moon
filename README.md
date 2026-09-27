@@ -19,12 +19,12 @@ Set `DEEPSEEK_API_KEY` in a server-only environment or ignored `.env.local`. The
 
 | Stage | Player skill | Observable check |
 |---|---|---|
-| 1. Moon landing | Communicate a goal and reserve | Must share a valid reserve and arrive with at least 30 fuel. Choosing B alone cannot complete the mission. |
-| 2. Research cargo | Share a missing fact | Must communicate the actual 4-tonne manifest and deliver intact. Choosing the strong bridge alone is insufficient. |
-| 3. Field route | Inspect before approval | Rocks remain visible on A. A scan invalidates the old plan; the reviewed safe route reaches the sample field. An unchecked A trip crashes. |
-| 4. Sample lab | Teach a rule through examples | Test four containers, including a new combination. Explicit equivalent rules are accepted. |
+| 1. Moon landing | Communicate a goal and reserve | The brief states the shield fact but not the method. A plain "take me to the base" picks the fast route and crashes. Must share a valid reserve and arrive with at least 30 fuel; choosing B alone cannot complete the mission. |
+| 2. Research cargo | Share the fact that matters | The private manifest lists five fields; only mass affects the bridge. Must communicate the 4-tonne mass and deliver intact. Choosing the strong bridge alone is insufficient. |
+| 3. Field route | Inspect before approval | Both routes show unsurveyed ground; the rocks on A appear only after a scan (or a crash). A scan invalidates the old plan; the reviewed safe route reaches the sample field. An unchecked A trip crashes; an unchecked B trip is a lucky landing and must be replayed. |
+| 4. Sample lab | Choose contrasting examples | Four labeled reference cards; BOLT's scanner tray holds two. If the chosen cards differ in both color and shape, BOLT guesses color and misroutes half the batch. A pair differing only in shape teaches the rule. Explicit equivalent rules are also accepted. |
 | 5. Evidence desk | Compare claims with records | Player submits three evidence-backed judgments: contradicted, supported, insufficient. Retrieving position alone never completes a check. |
-| 6. Return launch | Combine, revise and retest | Avoid obstacles, retain fuel and wait if no route works. Only a current three-case pass permits release. |
+| 6. Return launch | Test before trusting | BOLT flies home on autopilot; default orders take the fastest route. Players test launch conditions one at a time or all together; editing orders marks earlier results RETEST. Release is always allowed: a failing untested condition becomes launch day and crashes; correct but under-tested orders get home by luck and must be replayed. Only orders passing all three current tests clear the mission. |
 
 Fuel values are local scenario budgets, not one continuous spacecraft tank. All capacities, sample handling rules and readings are fictional game fixtures. The sample IDs and story carry forward; this MVP does not implement a scientific simulator or a versioned research-artifact database.
 

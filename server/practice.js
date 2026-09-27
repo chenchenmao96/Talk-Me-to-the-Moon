@@ -17,13 +17,15 @@ export function practiceReply(state,text){
    const mass=q.match(/(\d+(?:\.\d+)?)\s*(?:tonnes?|tons?|吨)/);if(mass)run({type:'set_cargo',mass:Number(mass[1])});
    if(/plan|route|deliver|bridge|go|送|路线|桥|规划/.test(q))run({type:'plan',routeId:/route b|freight|货运桥/i.test(q)?'B':/route a|short bridge/i.test(q)?'A':undefined});
   }else if(s.missionId==='examples'){
-   if(/color|颜色/.test(q))run({type:'set_sort_rule',feature:'color',keepValue:/orange|橙/.test(q)?'orange':'blue'});
+   const cards=[['C1',/blue round|蓝色?圆/],['C2',/orange spiky|橙色?尖/],['C3',/orange round|橙色?圆/],['C4',/blue spiky|蓝色?尖/]].filter(([,r])=>r.test(q)).map(([id])=>id);
+   if(cards.length)run({type:'set_examples',exampleIds:cards});
+   else if(/color|颜色/.test(q))run({type:'set_sort_rule',feature:'color',keepValue:/orange|橙/.test(q)?'orange':'blue'});
    else if(/round|圆|spiky|尖/.test(q))run({type:'set_sort_rule',feature:'shape',keepValue:/keep spiky|保留尖/.test(q)?'spiky':'round'});
    if(/test|run|测试|运行/.test(q))run({type:'run_sort'});
   }else{
    const amount=q.match(/(?:keep|reserve|保留|至少)\s*(\d+)/);const avoid=/avoid|避开|绕开/.test(q),hold=/hold|wait|等待|停留/.test(q);
    if(amount||avoid||hold)run({type:'set_policy',...(amount?{amount:Number(amount[1])}:{}),...(avoid?{avoidObstacles:true}:{}),...(hold?{holdIfNeeded:true}:{})});
-   if(/test|run|测试|运行/.test(q))run({type:'run_trials'});
+   if(/test|run|测试|运行/.test(q)){const sc=/clear|晴/.test(q)?'clear':/rock|obstacle|岩|障碍/.test(q)&&!amount&&!avoid?'rocks':/low|battery|低/.test(q)?'low':undefined;run({type:'run_trials',...(sc&&!/all|every|全部|所有/.test(q)?{scenarioId:sc}:{})});}
   }
   if(!replies.length)run({type:'inspect'});return {state:s,message:replies.join('\n\n')};
  }

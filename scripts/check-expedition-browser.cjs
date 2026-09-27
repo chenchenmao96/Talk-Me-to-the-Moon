@@ -2,7 +2,7 @@
 const {chromium}=require(process.env.PLAYWRIGHT_PATH||'playwright');
 const {spawn}=require('node:child_process');const assert=require('node:assert/strict');const path=require('node:path');const fs=require('node:fs');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');fs.mkdirSync(out,{recursive:true});
-(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
+(async()=>{const browser=await chromium.launch(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH,headless:true}:{channel:'chrome',headless:true});try{
  for(const lang of ['en','zh']){
   const server=spawn(process.execPath,['server/index.js'],{cwd:root,env:{...process.env,PORT:'4190'},stdio:'ignore'});let page;
   try{
@@ -27,19 +27,22 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');fs.mk
    };
    await page.goto('http://127.0.0.1:4190/?lang='+lang);await page.screenshot({path:path.join(out,`expedition-home-${lang}.png`),fullPage:true});
    await btn('LET’S PLAY ➜','开始游戏 ➜').click();await ready();assert.equal(await page.locator('.levels button').count(),6);
+   await send('Take me to Selene Base.');await action('LAUNCH ROCKET ↑','发射火箭 ↑');await page.getByRole('heading',{name:t('WELP. THAT EXPLODED.','哎呀，炸了。')}).waitFor();await btn('REBUILD & RETRY ↻','重造火箭，再试一次 ↻').click();await ready();
    await send('Plan route B to base.');await btn('LAUNCH ROCKET ↑','发射火箭 ↑').click();assert.equal(await page.locator('.controls .result').count(),0);
    await send('Keep at least 30 fuel and plan a route.');await action('LAUNCH ROCKET ↑','发射火箭 ↑');await next();
    await send('Plan route B for delivery.');await btn('DELIVER CARGO ↑','开始运送 ↑').click();assert.equal(await page.locator('.controls .result').count(),0);
    await send('The cargo weighs 4 tonnes. Plan a bridge route.');await action('DELIVER CARGO ↑','开始运送 ↑');await next();
-   assert.equal(await page.locator('.route-obstacle').count(),1);await send('Fly to base.');await action('DRIVE ROVER ↑','驾驶探测车 ↑');await page.getByRole('heading',{name:t('WELP. THAT EXPLODED.','哎呀，炸了。')}).waitFor();
-   await btn('REBUILD & RETRY ↻','重造火箭，再试一次 ↻').click();await ready();assert.equal(await page.locator('.route-obstacle').count(),1);await send('Scan both sites and plan a route.');await action('DRIVE ROVER ↑','驾驶探测车 ↑');await next();
-   await send('Sort by color, keep blue, and test.');assert.equal(await page.locator('.specimen.missed').count(),2);await send('Keep round shapes, reject spiky shapes, and test.');await page.locator('.controls .result').waitFor();await next();
+   assert.equal(await page.locator('.route-obstacle').count(),0);assert.equal(await page.locator('.unsurveyed').count(),2);await send('Fly to base.');await action('DRIVE ROVER ↑','驾驶探测车 ↑');await page.getByRole('heading',{name:t('WELP. THAT EXPLODED.','哎呀，炸了。')}).waitFor();
+   await btn('REBUILD & RETRY ↻','重造火箭，再试一次 ↻').click();await ready();assert.equal(await page.locator('.route-obstacle').count(),0);await send('Scan both sites and plan a route.');assert.equal(await page.locator('.route-obstacle').count(),1);await action('DRIVE ROVER ↑','驾驶探测车 ↑');await next();
+   const tray=page.locator('.tray-picks button');await tray.nth(0).click();await tray.nth(1).click();await btn('LOAD CARDS INTO BOLT ➜','把卡片交给 BOLT ➜').click();await btn('RUN TEST BATCH ➜','运行分拣测试 ➜').click();await page.locator('.specimen.missed').first().waitFor();assert.equal(await page.locator('.specimen.missed').count(),2);
+   await tray.nth(1).click();await tray.nth(3).click();await btn('LOAD CARDS INTO BOLT ➜','把卡片交给 BOLT ➜').click();await btn('RUN TEST BATCH ➜','运行分拣测试 ➜').click();await page.locator('.controls .result').waitFor();await page.screenshot({path:path.join(out,`expedition-examples-${lang}.png`),fullPage:true});await next();
    await page.screenshot({path:path.join(out,`expedition-audit-${lang}.png`),fullPage:true});await audit();await next();
+   await page.locator('.scenario-tests button').first().click();await page.locator('.scenario-board .passed').first().waitFor();await page.screenshot({path:path.join(out,`expedition-one-test-${lang}.png`),fullPage:true});await action('RELEASE ORDERS & SLEEP 🌙','发布指令，进入休眠 🌙');await page.getByRole('heading',{name:t('WELP. THAT EXPLODED.','哎呀，炸了。')}).waitFor();await page.screenshot({path:path.join(out,`expedition-launch-day-${lang}.png`),fullPage:true});await btn('REBUILD & RETRY ↻','重造火箭，再试一次 ↻').click();await ready();
    await btn('TEST ALL THREE ➜','测试全部三种情况 ➜').click();await page.locator('.scenario-board .missed').first().waitFor();assert.equal(await page.locator('.scenario-board .passed').count(),1);
    await send('Avoid obstacles and test all situations.');assert.equal(await page.locator('.scenario-board .passed').count(),2);
    await send('Keep 30 fuel and hold if no route works. Test all situations.');assert.equal(await page.locator('.scenario-board .passed').count(),3);
-   await send('Keep 0 fuel.');assert.equal(await page.locator('.release').count(),0);await send('Keep 30 fuel and test all situations.');
-   await action('RELEASE TESTED POLICY ✓','批准发布已验证策略 ✓');await btn('COLLECT YOUR BADGES ★','领取徽章 ★').click();await page.getByText(t('ALL 6 BADGES UNLOCKED','六枚徽章全部解锁'),{exact:true}).waitFor();
+   await send('Keep 0 fuel.');assert.equal(await page.locator('.scenario-board .stale').count(),3);await send('Keep 30 fuel and test all situations.');
+   await action('RELEASE ORDERS & SLEEP 🌙','发布指令，进入休眠 🌙');await btn('COLLECT YOUR BADGES ★','领取徽章 ★').click();await page.getByText(t('ALL 6 BADGES UNLOCKED','六枚徽章全部解锁'),{exact:true}).waitFor();
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.screenshot({path:path.join(out,`expedition-ending-${lang}.png`),fullPage:true});
    const saved=await page.evaluate(()=>localStorage.getItem('bolt-expedition-v2'));
    await btn('BACK HOME','返回首页').click();await btn('JUDGE DEMO · 3 MISSIONS ➜','评委演示 · 三个任务 ➜').click();await ready();assert.equal(await page.locator('.levels button').count(),3);

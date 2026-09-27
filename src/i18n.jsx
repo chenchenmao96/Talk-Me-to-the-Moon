@@ -26,7 +26,19 @@ export function tr(text,lang){
  if(text.includes('\n\n'))return text.split('\n\n').map(part=>tr(part,lang)).join('\n\n');
  const trimmed=text.trim();if(zh[trimmed])return text.replace(trimmed,zh[trimmed]);
  const rules=[
- [/^Policy drafted: avoid obstacles (YES|NO); reserve (\d+); hold if no route (YES|NO)\. Run all three simulations before release\.$/,(_,avoid,n,hold)=>`策略已提出：避障${avoid==='YES'?'开启':'关闭'}，保留 ${n} 燃料，无可行路线时${hold==='YES'?'等待':'未设置等待'}。发布前请测试全部三种情况。`],
+ [/^Policy drafted: avoid obstacles (YES|NO); reserve (\d+); hold if no route (YES|NO)\. Earlier results need a retest\.$/,(_,avoid,n,hold)=>`策略已提出：避障${avoid==='YES'?'开启':'关闭'}，保留 ${n} 燃料，无可行路线时${hold==='YES'?'等待':'未设置等待'}。之前的测试结果需要重测。`],
+ [/^(Clear skies|Rocks ahead|Low battery): (PASS|FAIL)\. (.+)$/,(_,name,res,reason)=>`${tr(name,lang)}：${res==='PASS'?'通过':'失败'}。${tr(reason,lang)}`],
+ [/^Policy test: (Clear skies|Rocks ahead|Low battery) (passed|failed)\.$/,(_,name,res)=>`策略测试：${tr(name,lang)}${res==='passed'?'通过':'失败'}。`],
+ [/^Launch day brought (Clear skies|Rocks ahead|Low battery)\. (.+?) These orders were tested in (\d) of 3 conditions\.$/,(_,name,reason,n)=>`发射当天遇到了「${tr(name,lang)}」。${tr(reason,lang)}这套指令只在 ${n}/3 种情况下测试过。`],
+ [/^BOLT made it home in (Clear skies|Rocks ahead|Low battery), but these orders were tested in only (\d) of 3 conditions\. Test every condition before release\.$/,(_,name,n)=>`BOLT 在「${tr(name,lang)}」中碰巧到家了，但这套指令只在 ${n}/3 种情况下测试过。发布前请测试每一种情况。`],
+ [/^Released untested orders\. (Clear skies|Rocks ahead|Low battery): (.+)$/,(_,name,reason)=>`发布了未充分测试的指令。${tr(name,lang)}：${tr(reason,lang)}`],
+ [/^The scanner tray holds only (\d) cards\. Pick the \d that show the difference best\.$/,(_,n)=>`扫描托盘只能放 ${n} 张卡。选出最能体现区别的 ${n} 张。`],
+ [/^I only see (KEEP|REJECT) examples\. Show me at least one KEEP and one REJECT card so I can spot the difference\.$/,(_,k)=>`我只看到了「${k==='KEEP'?'保留':'剔除'}」的例子。请至少给我一张「保留」和一张「剔除」的卡，我才能看出区别。`],
+ [/^(Your examples differ in both color and shape, so I guessed\. )?My rule: keep (.+) specimens; reject the others\. Run a test batch to check it\.$/,(_,guess,v)=>`${guess?'你的示例颜色和形状都不同，所以我只能猜。':''}我的规则：保留${tr(v,lang)}标本，剔除其他。运行测试批次来验证。`],
+ [/^Scanner tray: ([C\d, ]+)\. Inferred rule: keep (.+) by (.+)\.$/,(_,ids,v,f)=>`扫描托盘：${ids}。推断规则：按${tr(f,lang)}保留${tr(v,lang)}。`],
+ [/^Scanner tray: ([C\d, ]+)\. No rule inferred\.$/,(_,ids)=>`扫描托盘：${ids}。未能推断规则。`],
+ [/^Load reference cards ([C\d, ]+) onto the scanner tray\.$/,(_,ids)=>`把参考卡 ${ids} 放上扫描托盘。`],
+ [/^Test the (clear|rocks|low) launch condition\.$/,(_,id)=>`测试「${{clear:'晴天',rocks:'前方有障碍',low:'低电量'}[id]}」这种情况。`],
 
  [/^Cargo mass shared: ([\d.]+) tonnes\.$/,(_,n)=>`已告知货重：${n} 吨。`],
  [/^Cargo mass recorded: ([\d.]+) tonnes\. Earlier plans withdrawn\. Please request a route\.$/,(_,n)=>`货重已记录为 ${n} 吨，旧方案已撤回。现在可以请求过桥路线。`],
