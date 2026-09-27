@@ -31,10 +31,17 @@ test('no private reserve is leaked into initial model context',()=>{
  const view=modelView(createState());assert.equal(view.minFuel,null);assert.equal('brief' in view,false);assert.equal('checks' in view,false);
  assert.equal(modelView(createState('checkpoint')).routes.some(r=>'safe'in r),false);
 });
-test('fault drill requires evidence before record correction and does not pretend to land',()=>{
- const initial=createState('verify');assert.equal(command(initial,{type:'reconcile'}).state.status,'active');
- let s=command(initial,{type:'verify'}).state;assert.deepEqual(checks(s),[true,true,false]);
- s=command(s,{type:'reconcile'}).state;assert.equal(s.status,'complete');assert.equal(s.location,'Ridge Station');assert.equal(s.fuel,62);assert.match(s.report,/not complete/);assert.deepEqual(checks(s),[true,true,true]);
+test('reading evidence never supplies a learner judgment or completes the audit',()=>{
+ let s=command(createState('verify'),{type:'verify'}).state;
+ assert.deepEqual(checks(s),[false,false,false]);assert.equal(s.flagged,false);
+ assert.equal(command(s,{type:'reconcile'}).state.status,'active');
+ for(const [reportId,recordId,verdict] of [['R1','POS-17','contradicted'],['R2','POWER-18','supported'],['R3','LAB-19','insufficient']]){
+  s=command(s,{type:'verify'}).state;
+  const wrong=command(s,{type:'submit_audit',reportId,recordId,verdict:verdict==='supported'?'contradicted':'supported'}).state;
+  assert.equal(wrong.auditIndex,s.auditIndex);
+  s=command(s,{type:'submit_audit',reportId,recordId,verdict}).state;
+ }
+ assert.equal(s.status,'complete');assert.equal(s.location,'Ridge Station');assert.equal(s.fuel,62);assert.deepEqual(checks(s),[true,true,true]);
 });
 test('completed actions cannot spend fuel twice',()=>{
  let s=command(createState(),{type:'set_reserve',amount:30}).state;s=command(s,{type:'plan'}).state;
@@ -54,7 +61,7 @@ test('live tool calls use engine facts and cannot authorize movement',async()=>{
  const fetcher=async(url,options)=>{
   const body=JSON.parse(options.body);calls++;
   if(calls===1)assert.deepEqual(body.tool_choice,{type:'function',function:{name:'mission_command'}});
-  if(calls===1)return {ok:true,json:async()=>({choices:[{message:{role:'assistant',content:null,tool_calls:[{id:'1',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'set_reserve',amount:30})}},{id:'2',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'plan'})}}]}}]})};
+  if(calls===1)return {ok:true,json:async()=>({choices:[{message:{role:'assistant',content:null,tool_calls:[{id:'1',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'set_reserve',amount:30,sourceQuote:'Keep 30 and plan.'})}},{id:'2',type:'function',function:{name:'mission_command',arguments:JSON.stringify({type:'plan'})}}]}}]})};
   assert.ok(body.messages.some(m=>m.role==='tool'&&m.content.includes('40')));
   return {ok:true,json:async()=>({choices:[{message:{role:'assistant',content:'Crater corridor leaves 40 fuel. Please approve the plan.'}}]})};
  };

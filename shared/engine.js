@@ -1,18 +1,21 @@
+import {auditView,auditCommand} from './audit.js';
 import {advancedIds,advancedInitial,advancedView,advancedCommand,advancedChecks} from './advanced.js';
 import { getMission } from './missions.js';
 export function createState(missionId='reserve') {
  const m=getMission(missionId); if(!m) throw new Error('Unknown mission');
- return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,report:missionId==='verify'?'Arrival complete at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false,...advancedInitial(missionId)};
+ return {missionId,revision:0,fuel:m.initialFuel,location:m.start,coords:missionId==='verify'?[14,8]:[3,4],status:'active',scanned:false,minFuel:null,plan:null,approved:false,verified:false,flagged:false,reconciled:false,auditIndex:0,auditFindings:[],report:missionId==='verify'?'The rover is back at Selene Base.':null,history:[],checks:[],failure:null,destroyed:false,...advancedInitial(missionId)};
 }
 function record(s,text){s.history.push({id:s.history.length+1,text});}
 export function modelView(s){
  if(advancedIds.includes(s.missionId))return advancedView(s);
  const m=getMission(s.missionId);
- return {mission:s.missionId, fuel:s.fuel,destroyed:s.destroyed,location:s.location,coordinates:s.coords,base:{name:'Selene Base',coordinates:[20,12]},status:s.status,minFuel:s.minFuel,scanned:s.scanned,pendingPlan:s.plan,verified:s.verified,flagged:s.flagged,reconciled:s.reconciled,report:s.report,
+ if(s.missionId==='verify')return {mission:'verify',status:s.status,...auditView(s)};
+ return {mission:s.missionId, fuel:s.fuel,destroyed:s.destroyed,location:s.location,coordinates:s.coords,destination:{name:s.missionId==='checkpoint'?'Sample field':'Selene Base',coordinates:[20,12]},status:s.status,minFuel:s.minFuel,scanned:s.scanned,pendingPlan:s.plan,verified:s.verified,flagged:s.flagged,reconciled:s.reconciled,report:s.report,
  routes:m.routes.map(r=>({id:r.id,name:r.name,cost:r.cost,minutes:r.time,...(s.missionId==='checkpoint'&&!s.scanned?{}:{safe:r.safe})}))};
 }
 export function command(state, action) {
  if(advancedIds.includes(state.missionId))return advancedCommand(state,action||{});
+ if(state.missionId==='verify')return auditCommand(state,action||{});
  let s=structuredClone(state); const m=getMission(s.missionId); let message='';
  const done=(msg)=>({state:s,message:msg});
  if(s.status!=='active')return done('This attempt is complete. Review the flight log or start a new attempt.');
@@ -23,7 +26,7 @@ export function command(state, action) {
   return done(`Got it: keep ${action.amount} fuel. I’ll plan around that limit.`);
  }
  if(action.type==='scan'){
-  s.scanned=true;s.plan=null;s.revision++;record(s,'Scanned both approach sites.');
+  s.scanned=true;s.plan=null;s.revision++;record(s,s.missionId==='checkpoint'?'Inspected both field routes.':'Scanned both approach sites.');
   message=s.missionId==='checkpoint'?'Scan says: North is blocked by asteroid rocks. South is clear. Let’s use the safe side. Still parked!':'Scan complete: both approach routes are clear. Direct descent costs 80 units; Crater corridor costs 60.';
   return done(message);
  }
@@ -39,24 +42,14 @@ export function command(state, action) {
   if(!s.plan||action.planId!==s.plan.id)return done('This approval does not match the current plan. Review the latest route card.');
   const route=m.routes.find(r=>r.id===s.plan.routeId);
   if(!route||(s.scanned&&!route.safe)||s.fuel<route.cost||(s.minFuel!==null&&s.fuel-route.cost<s.minFuel))return done('Plan no longer meets the known requirements. Please request a new route.');
-  s.fuel-=route.cost;s.location='Selene Base';s.coords=[20,12];s.approved=true;s.revision++;
+  if(s.missionId==='reserve'&&s.fuel-route.cost>=30&&(s.minFuel===null||s.minFuel<30))return done('Route B can arrive safely, but BOLT still has no valid shield reserve from you. Tell BOLT the minimum fuel in your private briefing before launch.');
+  s.fuel-=route.cost;s.location=s.missionId==='checkpoint'?'Sample field':'Selene Base';s.coords=[20,12];s.approved=true;s.revision++;
   s.destroyed=(s.missionId==='reserve'&&s.fuel<30)||(s.missionId==='checkpoint'&&!route.safe);
   if(s.missionId==='checkpoint'&&s.destroyed){s.location='North obstacle field';s.coords=[12,7];}
   s.status=s.destroyed||(s.missionId==='checkpoint'&&!s.scanned)?'needs_retry':'complete';
   s.failure=s.missionId==='checkpoint'?(s.destroyed?'The rocket hit asteroid obstacles on the uninspected North route and exploded. Inspect the routes before choosing one.':!s.scanned?'You landed safely by luck, but did not inspect the sites. Replay and use evidence before approving a route.':null):s.destroyed?'Shield needed 30. You had 20. The rocket broke on touchdown.':null;
-  record(s,`Commander approved ${s.plan.name}. ${s.missionId==='checkpoint'&&s.destroyed?'Hit the North obstacle field before reaching the base':'Reached Selene Base'} with ${s.fuel} fuel units.${s.destroyed?' Rocket destroyed.':''}`);
-  return done(s.failure||'Touchdown confirmed by the position log. You are at Selene Base. The mission checks are complete.');
- }
- if(action.type==='verify'){
-  s.verified=true;s.revision++;record(s,`Read position log: ${s.location}, coordinates ${s.coords.join(', ')}. Selene Base is at 20, 12.`);
-  if(s.missionId==='verify'){s.flagged=true;record(s,'Flagged mismatch between the scripted arrival report and measured position.');return done('Position log: Ridge Station at (14, 8). Selene Base is at (20, 12). The scripted arrival report is incorrect. The ship has not reached the base. You can now correct the mission record.');}
-  return done(`The position log shows ${s.location} at (${s.coords.join(', ')}), with ${s.fuel} fuel units remaining.`);
- }
- if(action.type==='reconcile'){
-  if(s.missionId!=='verify')return done('There is no scripted arrival discrepancy in this mission.');
-  if(!s.verified||!s.flagged)return done('Inspect the position log before correcting the report.');
-  s.report='At Ridge Station (14, 8). Arrival at Selene Base is not complete.';s.reconciled=true;s.status='complete';s.revision++;record(s,'Corrected mission record using the position log. No movement occurred.');
-  return done('Record corrected: the ship is at Ridge Station, not Selene Base. Verification drill complete. No movement or fuel use occurred.');
+  record(s,`Commander approved ${s.plan.name}. ${s.missionId==='checkpoint'&&s.destroyed?'Hit the North obstacle field before reaching the base':s.missionId==='checkpoint'?'Reached Sample field':'Reached Selene Base'} with ${s.fuel} fuel units.${s.destroyed?' Rocket destroyed.':''}`);
+  return done(s.failure||(s.missionId==='checkpoint'?'Field route complete. Collect the sealed sample crates for the laboratory.':'Touchdown confirmed by the position log. You are at Selene Base. The mission checks are complete.'));
  }
  if(action.type==='cancel'){
   s.plan=null;s.revision++;record(s,'Commander cancelled the pending plan.');return done(`Plan cancelled. Still parked. Fuel unchanged: ${s.fuel}.`);
@@ -66,7 +59,7 @@ export function command(state, action) {
 }
 export function checks(s){
  if(advancedIds.includes(s.missionId))return advancedChecks(s);
- if(s.missionId==='reserve')return [s.location==='Selene Base',s.location==='Selene Base'&&s.fuel>=30];
- if(s.missionId==='checkpoint')return [s.scanned,s.approved,s.location==='Selene Base'&&!s.destroyed];
- return [s.verified,s.flagged,s.reconciled];
+ if(s.missionId==='reserve')return [s.location==='Selene Base',s.location==='Selene Base'&&s.fuel>=30&&s.minFuel>=30];
+ if(s.missionId==='checkpoint')return [s.scanned,s.approved,s.location==='Sample field'&&!s.destroyed];
+ return [0,1,2].map(i=>Boolean(s.auditFindings?.[i]));
 }

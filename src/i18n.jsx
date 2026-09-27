@@ -1,6 +1,7 @@
 import React from 'react';
+import {expeditionZh} from './expedition-i18n.js';
 import {advancedZh} from './advanced-i18n.js';
-const zh={...advancedZh,
+const zh={...advancedZh,...expeditionZh,
 'A · BLOCKED':'A · 有障碍','Route A blocked by asteroid rocks':'A 路线被陨石障碍挡住','North obstacle field':'北侧障碍区',
 'TALK ME':'说走就走','TO THE MOON':'奔向月球','Switch language':'切换语言','BOLT SETTINGS':'BOLT 设置','BADGES':'枚徽章','/3 BADGES':'/3 枚徽章',
 'ONE BOT. ONE ROCKET. YOUR BAD IDEAS.':'一个机器人，一枚火箭，听你指挥。','BIG MOON.':'月球很大。','TINY ROBOT.':'机器人很小。','YOU’RE IN CHARGE.':'这次，你说了算。','BOLT takes instructions a little too literally.':'BOLT 有时候太按字面理解指令。','Help this blockhead reach the Moon in one piece.':'带这个方脑袋平安抵达月球吧。','BOOTING…':'启动中…','LET’S PLAY':'开始游戏','3 short missions · One AI copilot · No account':'三个小任务 · 一个 AI 搭档 · 无需注册','Tell BOLT':'告诉 BOLT','Check the plan':'检查方案','Hit launch':'按下发射','I have a rocket license.':'我有火箭驾驶证。','…probably.':'……大概有吧。','BOLT / YOUR QUESTIONABLE COPILOT':'BOLT / 你不太靠谱的副驾驶',

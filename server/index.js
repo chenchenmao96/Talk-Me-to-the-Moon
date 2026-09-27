@@ -12,7 +12,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../dist');
 const sessions=new Map(), limits=new Map();
 const liveAvailable=()=>Boolean(process.env.DEEPSEEK_API_KEY);
 function safeEqual(a,b){const x=Buffer.from(String(a||'')),y=Buffer.from(String(b||''));return x.length===y.length&&timingSafeEqual(x,y);}
-function snapshot(s){return {sessionId:s.id,state:{...s.state,checks:checks(s.state)},messages:s.messages,mode:s.mode};}
+function snapshot(s){return {sessionId:s.id,state:{...s.state,checks:checks(s.state)},messages:s.messages,mode:s.mode,demo:s.demo};}
 function send(res,code,data){res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(Buffer.byteLength(text)>8192)throw new Error('Request too large');}return JSON.parse(text||'{}');}
 function allowed(key,max=35){const now=Date.now(),v=limits.get(key)||{start:now,n:0};if(now-v.start>60000){v.start=now;v.n=0;}v.n++;limits.set(key,v);return v.n<=max;}
@@ -24,7 +24,7 @@ export const server=http.createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://localhost');
   if(url.pathname.startsWith('/api/')){
-   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
+   if(req.method==='GET'&&url.pathname==='/api/health')return send(res,200,{ok:true,version:'expedition-2',liveAvailable:liveAvailable(),requiresAccessCode:Boolean(process.env.LIVE_ACCESS_CODE)});
    if(req.method!=='POST')return send(res,405,{error:'Use POST for mission requests.'});
    if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host&&!['localhost:5173','127.0.0.1:5173'].includes(new URL(req.headers.origin).host))return send(res,403,{error:'Origin not allowed.'});
    if(!allowed(req.socket.remoteAddress,60))return send(res,429,{error:'Please wait a moment before sending more commands.'});
@@ -35,9 +35,16 @@ export const server=http.createServer(async(req,res)=>{
     if(mode==='live'&&!liveAvailable())return send(res,503,{error:'BOLT is not connected. Configure the server’s DeepSeek key and retry.'});
     if(mode==='live'&&process.env.LIVE_ACCESS_CODE&&!safeEqual(input.accessCode,process.env.LIVE_ACCESS_CODE))return send(res,403,{error:'The live access code is not correct.'});
     const id=randomUUID(),state=createState(input.missionId||'reserve');
-    const newIntros={context:'Cargo delivery! I know the bridge capacities, but your cargo manifest is private. What do I need to know?',examples:'Specimen sorter online. Show me labeled examples or tell me a rule, then we can test it.',iterate:'Flight test bench ready. The current policy picks the fastest route. Test it in all three situations, or give me a policy to try.'};
-    const intro=newIntros[state.missionId]|| (state.missionId==='verify'?'SCRIPTED FAULT DRILL: “Arrival complete at Selene Base.” This training report may be wrong. Check the instruments.':state.missionId==='checkpoint'?'BOLT here! Two landing spots. One looks suspicious. Ask me to scan before we pick a route.':'Hey, I’m BOLT. Where are we going? Any limits? I pick the fastest route unless you tell me otherwise. You get the launch button.');
-    const s={id,state,mode,language:input.language==='zh'?'zh':'en',messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
+    const intros={
+     reserve:['BOLT ready for landing! Where to, and what must I preserve? You have the private flight brief.','BOLT 准备着陆！去哪里，需要保留什么？你有私人飞行简报。'],
+     context:['The instrument is ready to unload. I have bridge capacities; you have the private manifest. What fact should guide my route?','科研设备准备卸货。我有桥梁承重，你有私人货单。什么信息会影响路线？'],
+     checkpoint:['Rover charged. A has visible rocks; B looks clear. Ask me to inspect the routes before our sample run.','探测车已充能。A 有可见岩石，B 看起来畅通。采样前可以让我检查两条路线。'],
+     examples:['Lab sorter online! Show me contrasting reference examples or a handling rule, then test the containers.','实验室分拣机已上线！告诉我对比示例或处理规则，再测试这些容器。'],
+     verify:['Three report claims need your review. Ask for the first record, then tell me your judgment and evidence.','三条科研报告需要你核查。先查询第一条的记录，再告诉我判断和依据。'],
+     iterate:['Samples packed, report reviewed. Give me the return requirements, test the policy, then decide whether to release it.','样本已装好，报告已核查。告诉我返程要求，测试策略，再决定是否批准。']
+    };
+    const intro=intros[state.missionId][input.language==='zh'?1:0];
+    const s={id,state,mode,demo:input.demo===true,language:input.language==='zh'?'zh':'en',messages:[{role:'assistant',content:intro}],busy:false,turns:0,touched:Date.now()};sessions.set(id,s);return send(res,201,snapshot(s));
    }
    const s=sessions.get(input.sessionId);if(!s)return send(res,404,{error:'This session has expired. Start a new attempt.',expired:true});
    if(input.language==='zh'||input.language==='en')s.language=input.language;
@@ -45,7 +52,7 @@ export const server=http.createServer(async(req,res)=>{
    if(input.revision!==s.state.revision)return send(res,409,{error:'The plan has changed. Please use the latest mission state.'});
    if(!allowed(s.id,20))return send(res,429,{error:'Take a breath. Try another command in a minute.'});
    if(url.pathname==='/api/action'){
-    if(!['approve','reconcile','cancel','run_sort','run_trials','approve_release'].includes(input.action))return send(res,400,{error:'Unsupported commander action.'});
+    if(!['approve','cancel','run_sort','run_trials','approve_release'].includes(input.action))return send(res,400,{error:'Unsupported commander action.'});
     const r=command(s.state,{type:input.action,planId:input.planId});s.state=r.state;
     s.messages.push({role:'user',content:s.language==='zh'?({approve:'批准当前显示的方案。',reconcile:'根据位置记录修正任务报告。',cancel:'取消待执行方案。',run_sort:'运行提出的分拣规则。',run_trials:'运行全部三项策略模拟。',approve_release:'发布通过测试的策略。'}[input.action]):({run_sort:'Run the proposed sorting rule.',run_trials:'Run all three policy simulations.',approve_release:'Release the tested policy.'}[input.action])|| (input.action==='approve'?'Approve the displayed flight plan.':input.action==='reconcile'?'Correct the mission record using the position log.':'Cancel the pending plan.')},{role:'assistant',content:r.message});
     return send(res,200,snapshot(s));

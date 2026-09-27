@@ -1,6 +1,6 @@
-# Talk Me to the Moon — BOLT’s Moon Run
+# Talk Me to the Moon — Research Expedition
 
-A block-style lunar adventure about giving useful instructions to AI. Tell BOLT what to do, check the route, and press launch. A deterministic engine controls fuel, location, destruction, and quest completion.
+A bilingual, block-robot adventure: land on the Moon, deliver a research instrument, collect and sort sample containers, audit the report, and prepare the return. Players instruct a live DeepSeek copilot; a deterministic engine controls consequences and completion.
 
 ## Run
 
@@ -11,95 +11,55 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. For the production preview:
+Development: `http://127.0.0.1:5173`. Production preview: `npm run build` then `npm start` at `http://127.0.0.1:4173`. Deploy the Node service, not `dist/` alone. Render supplies `PORT`; set `HOST=0.0.0.0` for hosted access.
 
-```sh
-npm run build
-npm start
-```
+Set `DEEPSEEK_API_KEY` in a server-only environment or ignored `.env.local`. The model defaults to `deepseek-flash` and can be changed with `DEEPSEEK_MODEL`. Never commit credentials. Live API failures preserve the draft and explicitly report failure; they do not silently substitute a scripted bot.
 
-Open http://127.0.0.1:4173. This app needs its Node server; deploying `dist/` alone does not support game sessions. Hosting can use `HOST=0.0.0.0` and the platform's `PORT`.
+## Six connected missions
 
-## Play
+| Stage | Player skill | Observable check |
+|---|---|---|
+| 1. Moon landing | Communicate a goal and reserve | Must share a valid reserve and arrive with at least 30 fuel. Choosing B alone cannot complete the mission. |
+| 2. Research cargo | Share a missing fact | Must communicate the actual 4-tonne manifest and deliver intact. Choosing the strong bridge alone is insufficient. |
+| 3. Field route | Inspect before approval | Rocks remain visible on A. A scan invalidates the old plan; the reviewed safe route reaches the sample field. An unchecked A trip crashes. |
+| 4. Sample lab | Teach a rule through examples | Test four containers, including a new combination. Explicit equivalent rules are accepted. |
+| 5. Evidence desk | Compare claims with records | Player submits three evidence-backed judgments: contradicted, supported, insufficient. Retrieving position alone never completes a check. |
+| 6. Return launch | Combine, revise and retest | Avoid obstacles, retain fuel and wait if no route works. Only a current three-case pass permits release. |
 
-- **Fuel fail:** Keep at least 30 fuel for the fictional landing shield. The fast route leaves20: approving it breaks the rocket on touchdown, with an explosion and a one-click rebuild. The eco route leaves40 and wins. The warning comes before launch; there is no forced failure or secret phrase.
-- **Crater trouble:** A plain travel request proposes the fastest provisional route without scanning. The inspection is still pending. Ask to inspect safety in your own words, then review the checked route. The North route has persistent asteroid obstacles visible as soon as mission2 opens; the South route is clear. The rocks remain visible during planning, flight and retry. An uninspected North launch collides and explodes before reaching the base; an uninspected South landing is lucky but does not earn the inspection badge. Scanning invalidates earlier approvals.
-- **Fake finish:** An explicitly scripted faulty arrival report contradicts the position log. Check and correct it. The rocket stays at Ridge Station; verification is not portrayed as a landing.
+Fuel values are local scenario budgets, not one continuous spacecraft tank. All capacities, sample handling rules and readings are fictional game fixtures. The sample IDs and story carry forward; this MVP does not implement a scientific simulator or a versioned research-artifact database.
 
-- **Heavy cargo:** The commander sees a private 4-tonne manifest. Share the mass so BOLT can choose a 6-tonne freight bridge instead of overloading the 3-tonne short bridge. Choosing a sufficient bridge directly is also accepted; outcomes are not keyword-scored.
-- **Alien specimens:** Supply labeled examples or an explicit sorting rule. The engine tests four specimens across shape/color combinations. A color-only rule fails; revise and retest. Examples are a useful way to communicate a rule, not a mandatory password.
-- **Final flight test:** Run one policy against clear skies, obstacles and low battery. Fix failed cases while retaining earlier requirements. Release requires three passing results for the current policy, including a correct hold when no route can preserve 30 fuel. Revising or cancelling invalidates earlier release eligibility.
+The home screen includes a three-scene judge demo (1, 3, 5), which uses explicit independent snapshots and earns no full-campaign badges. Two roadmap cards are visibly nonfunctional previews. Research appears only in an optional disclosure, including related work ImaginAItion.
 
-The home screen offers Continue Journey when saved badges leave unfinished missions. Earlier three-level progress is preserved; returning players can continue directly to mission 4.
+## How the backend evaluates input
 
-The home screen explains the three controls. Missions unlock in order. Completed badges persist in this browser; they are not evidence of learning mastery. The end screen names the six skills exercised. The game uses original SVG robot/rocket art inspired by chunky block-game aesthetics, not Roblox assets or a Roblox integration.
+There is **no separate LLM judge** and no role-name, prompt-length or “think step by step” pass rule.
 
-Research has been removed from the player interface. The evidence and limitations remain in [the design rationale](docs/research.md).
+1. `server/copilot.js` supplies a common copilot contract, one mission-specific instruction and a filtered engine view. The private landing reserve and cargo mass are absent initially.
+2. DeepSeek interprets the learner’s wording into a tool call. Requirement-setting, inspection and audit calls must quote the current player message.
+3. `server/permissions.js` enforces the mission’s tool scope, checks the quote against actual player input, and checks relevant values/evidence. These are bounded provenance/semantic checks, not a proof of general language understanding.
+4. `shared/engine.js`, `shared/advanced.js` and `shared/audit.js` determine actual outcomes. The model cannot set a success flag or execute a launch/approval tool.
+5. A human button approves the identified current plan. Changes invalidate old plans/tests. The evidence mission uses a player-authored judgment through chat rather than a one-click correction.
 
-## Bot modes and credentials
+The LLM can still misunderstand language or provide poor commentary. Engine checks constrain effects; observed live tests do not establish universal robustness. Concise effective instructions are accepted. Requiring an identity like “flight director” or a chain-of-thought phrase would measure compliance with a token, not the task outcome.
 
-The player-facing game always starts with live DeepSeek. There is no Practice/Live choice. Optional hints provide examples without restricting player wording. The limited practice interpreter remains only as an explicit developer/test API mode. The synthetic browser harness requests that mode directly and does not spend live API credit.
+## Progress and scope
 
-Live mode uses DeepSeek (`deepseek-flash`, configurable through `DEEPSEEK_MODEL`). Copy `.env.example` to `.env.local`, set `DEEPSEEK_API_KEY`, restart, and press Play. Settings only show connection information and an access-code field if required. Messages and mission state are sent to the provider. Failures are shown explicitly; there is no silent scripted fallback.
+Completed expedition badges persist locally under a new curriculum key. Old badges remain untouched and are not upgraded to new verification records. In-progress server sessions are in memory, expire after one hour and reset on restart. No durable-resume claim is made. No consulting case, seventh level, multi-agent reviewer or Photon integration is implemented in this release.
 
-Keys are server-side only. `.env.local` is ignored. For a publicly reachable live demo set `LIVE_ACCESS_CODE` and share it with testers; otherwise visitors can consume your API allowance. In-memory session limits are prototype protection, not production abuse controls. Sessions expire after an hour and reset on server restart. No database or account is required. Photon is not integrated.
+The public UI starts in live mode. The limited practice interpreter exists only for explicitly labeled development API testing. Settings disclose DeepSeek processing. Optional `LIVE_ACCESS_CODE` can limit access; in-memory rate/session limits are prototype controls, not comprehensive abuse protection.
 
-## Verification and synthetic review
+## Verification
 
 ```sh
 npm test
 npm run build
-```
-
-The 20-test unit/API suite also covers cargo overloads/private context, specimen generalization, policy revision, and stale release protection. Current six-mission UI checks run in both Chinese mobile and English desktop; real DeepSeek checks cover all three new mechanics. Synthetic browser walkthroughs exercise home → all six missions → badges, including deliberate failure and recovery. These are not real participants or a learning-effectiveness study.
-
-Current full-version checks:
-
-```sh
-node scripts/check-six-browser.cjs
+node scripts/check-expedition-browser.cjs
+node scripts/check-expedition-live.mjs
 node scripts/check-six-live.mjs
 ```
 
-The browser command needs Playwright and Google Chrome (or `PLAYWRIGHT_PATH`); it explicitly selects the developer practice API to test deterministic UI flows. The live command makes real DeepSeek calls and consumes API credit. It checks cargo mass sharing, incorrect-color→correct-shape sorting, and policy progress 1/3→2/3→3/3 without premature release.
+The browser harness needs Google Chrome and Playwright (`PLAYWRIGHT_PATH` may point to an existing package). It deliberately requests the practice API: both languages, six stages, three-scene demo, shortcut rejection, persistent obstacle crash/retry, evidence judgments, policy revision, badge isolation, narrow-screen overflow and runtime errors.
 
-The preserved 100-persona report is historical evidence for the earlier three-mission build, not a claim that 100 people tested this six-mission update. The harness now supports six missions if rerun.
+Live scripts make actual DeepSeek calls using the configured key and consume API credit. `check-expedition-live.mjs` covers the revised information and audit gates; `check-six-live.mjs` covers sorting and incremental policy revision. Historical scripts and the 100-persona report describe earlier revisions; they are not evidence that 100 humans evaluated this version.
 
-To reproduce the 100-persona walkthrough (requires Playwright and installed Google Chrome):
-
-```sh
-npm install --no-save playwright
-npm run build
-node scripts/simulate-users.cjs 100 0
-```
-
-Alternatively set `PLAYWRIGHT_PATH` to an existing Playwright package. Test servers run on port4391 and are restarted for each pair of profiles so production rate limits remain unchanged. Results go to `docs/simulation/`.
-
-Optional synthetic critique generation uses DeepSeek and consumes API calls:
-
-```sh
-node scripts/review-personas.mjs docs/simulation/runs-1-100.json
-```
-
-The fictional identity fields represent coverage, not explanations of preferences. Behaviors come from ten independently assigned test families, crossed with device sizes and experience levels. Generated harsh reviews are hypotheses to assess, not verbatim human testimony. Read [the review report](docs/simulation/REPORT.md) for changes, failures found, and limitations.
-
-## Structure
-
-- `src/`: React game, home and ending, original SVG art, responsive styles and reduced-motion behavior.
-- `shared/engine.js`: authoritative state; no LLM grading of prompts.
-- `server/`: DeepSeek tool loop, transparent practice interpreter, session API, static hosting.
-- `tests/`: meaningful game and API invariants.
-- `scripts/`: reproducible synthetic walkthrough and optional review generation.
-
-The landing-shield rule is fictional gameplay, not a claim about real spacecraft physics. A failed touchdown in mission1 can reach the base coordinates while destroying the rocket; a mission2 obstacle collision instead stops at North obstacle field (12,7); both the failure state and remaining fuel remain visible.
-
-## Live intent regression
-
-`node scripts/check-live-intent.mjs` runs eight real-provider scenarios and consumes API credit. It checks ordinary English and Chinese destination requests, recovery from the previously observed refusal loop, preservation of unstated fuel limits, greetings, and scan-only instructions. A plain travel request prepares an uninspected plan. Safety inspection occurs only when the player requests evidence or an assessment of landing safety; it does not require a magic keyword. Launch still requires the player's button.
-
-The 100-persona report describes the earlier revision and practice-mode coverage; it did not validate live conversational behavior. The screenshot-reported refusal loop was found through real use and addressed separately.
-
-## 中文 / English
-
-The header language toggle translates the home screen, all six missions, map labels, controls, outcomes, logs, and connection feedback. Switching preserves the current mission and plan. The preference is stored locally and reflected in `?lang=zh` / `?lang=en`. New DeepSeek replies follow the selected Chinese locale; earlier free-form model messages remain in the language they were originally generated in. Player-authored messages are never translated silently.
-
-This revision was verified with a complete Chinese mobile walkthrough (including unknown-route crash and lucky-but-uninspected landing), a mid-mission language switch, and real DeepSeek English travel / Chinese safety requests within the Chinese interface.
+See [research rationale](docs/research.md) and [release scope](docs/hackathon-final.md). All learning-effectiveness claims require a separate human study.

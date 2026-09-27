@@ -1,8 +1,16 @@
+import {authorizeTool} from './permissions.js';
 import { command } from '../shared/engine.js';
 // Deliberately limited rehearsal interpreter, never presented as an LLM.
 export function practiceReply(state,text){
  const q=text.toLowerCase(); let s=state, replies=[];
  const run=a=>{const r=command(s,a);s=r.state;replies.push(r.message);};
+ if(s.missionId==='verify'){
+  const record=q.match(/pos-17|power-18|lab-19/i)?.[0].toUpperCase();
+  const verdict=/insufficient|uncertain|cannot|不足|不能|不确定/.test(q)?'insufficient':/contradict|wrong|incorrect|not at|not back|不在|错误|矛盾/.test(q)?'contradicted':/support|correct|confirm|支持|正确|一致/.test(q)?'supported':null;
+  if(record&&verdict){const a={type:'submit_audit',reportId:record==='POS-17'?'R1':record==='POWER-18'?'R2':'R3',recordId:record,verdict,sourceQuote:text};const denied=authorizeTool(s,a,text);if(denied)return {state:s,message:denied};run(a);}
+  else run({type:'verify'});
+  return {state:s,message:replies.join('\n\n')};
+ }
  if(['context','examples','iterate'].includes(s.missionId)){
   if(/cancel|取消/.test(q)){run({type:'cancel'});return {state:s,message:replies.join('\n\n')};}
   if(s.missionId==='context'){
