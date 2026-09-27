@@ -33,7 +33,7 @@ test('HTTP session isolation, revision checks, valid mission flow and invalid re
    const key=process.env.DEEPSEEK_API_KEY;process.env.DEEPSEEK_API_KEY='test-placeholder';
    try{
     let review=await post('session',{missionId:'verify',mode,language:'en'});
-    for(const [i,message] of ['Reject because the rover is at Ridge Station.','Accept because the power record shows 62 units remaining.','Unknowable because chemical analysis is pending.'].entries()){
+    for(const [i,message] of ['Reject because the rover is at Ridge Station.','Accept because the power record shows 62 units remaining.','R3 is not verified as the result is pending'].entries()){
      review=await post('chat',{sessionId:review.body.sessionId,revision:review.body.state.revision,message});
      assert.equal(review.status,200);assert.equal(review.body.state.auditIndex,i+1);
      assert.equal(review.body.state.auditFindings.length,i+1);

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {assessAudit} from '../server/audit-language.js';
 import {liveReply} from '../server/copilot.js';
 import {createState,command} from '../shared/engine.js';
+import {practiceReply} from '../server/practice.js';
 
 const response=message=>({ok:true,json:async()=>({choices:[{message}]})});
 const noProvider=async()=>{throw new Error('A clear judgment must not depend on another model approval.');};
@@ -11,6 +12,38 @@ function atReport(index){const s=session();for(let i=0;i<index;i++){
  s.state=command(s.state,{type:'verify'}).state;
  s.state=command(s.state,{type:'submit_audit',reportId:['R1','R2'][i],recordId:['POS-17','POWER-18'][i],verdict:['contradicted','supported'][i]}).state;
 }return s;}
+
+test('unverified claims with pending evidence complete R3 in one turn, including the reported phrase',async()=>{
+ for(const text of [
+  'R3 is not verified as the result is pending',
+  'R3 has not been verified because the analysis is pending.',
+  'R3 is not yet confirmed because the result is pending.',
+  "R3 hasn't been confirmed because chemical analysis is pending.",
+  "R3 isn't verified because no composition result is available.",
+  'R3 is unverified because analysis is pending.',
+  'R3 remains unconfirmed because the test is pending.',
+  'R3 is not established because chemical analysis is pending.',
+  'We cannot verify R3 because analysis is pending.'
+ ]){
+  const a=assessAudit('R3',text);assert.equal(a.verdict,'insufficient',text);assert.equal(a.evidence,true,text);
+  const s=atReport(2),out=await liveReply(s,text,noProvider);
+  assert.equal(out.state.status,'complete',text);assert.equal(out.state.auditFindings.length,3,text);
+  assert.equal(out.state.auditFindings[2].verdict,'insufficient',text);
+  assert.match(out.message,/R3 review saved/);
+  assert.equal(practiceReply(s.state,text).state.status,'complete',text);
+ }
+});
+
+test('verification wording still needs evidence and must not approve the wrong claim',async()=>{
+ const fake=async()=>response({content:'Correct!'});
+ for(const text of ['R3 is not verified.', 'R3 is verified because chemical analysis is pending.', 'R3 is not verified because analysis is complete.']){
+  const out=await liveReply(atReport(2),text,fake);
+  assert.equal(out.state.status,'active',text);assert.equal(out.state.auditIndex,2,text);
+  assert.doesNotMatch(out.message,/saved|green/,text);
+ }
+ const out=await liveReply(atReport(1),'R2 is not verified because it has 62 units.',noProvider);
+ assert.equal(out.state.auditIndex,1);
+});
 
 test('accept, reject and unknowable support natural English and Chinese reasons',()=>{
  for(const [id,verdict,phrases] of [
